@@ -38,3 +38,30 @@ tooltip {
   background-color: #131e30; color: @aero_text;
   border: 1px solid @aero_border; border-radius: 12px;
 }
+
+/* AeroOS Docklike taskbar: grouped, pinnable app buttons with a calm active state. */
+#docklike-plugin button {
+  min-height: 42px;
+  min-width: 42px;
+  border-radius: 10px;
+  background-image: none;
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: 4px;
+  box-shadow: none;
+}
+#docklike-plugin .open_group {
+  background-color: rgba(52, 75, 119, 0.50);
+  border-bottom: 2px solid #8b9cff;
+}
+#docklike-plugin .active_group {
+  background-color: rgba(67, 91, 147, 0.72);
+  border: 1px solid rgba(139, 156, 255, 0.48);
+}
+#docklike-plugin .hover_group {
+  background-color: rgba(76, 100, 153, 0.55);
+  border: 1px solid rgba(168, 181, 255, 0.40);
+}
+#docklike-plugin .window_count {
+  color: #ffffff;
+}
