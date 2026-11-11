@@ -29,6 +29,7 @@ network-manager
 dbus-x11
 polkitd
 pkexec
+mate-polkit
 udisks2
 xdg-utils
 network-manager-gnome
