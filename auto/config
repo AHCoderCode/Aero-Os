@@ -7,7 +7,7 @@ lb config noauto \
   --distribution trixie \
   --architectures amd64 \
   --binary-image iso-hybrid \
-  --bootloaders syslinux \
+  --bootloader syslinux \
   --archive-areas "main contrib non-free-firmware" \
   --debian-installer false \
   --system live \
