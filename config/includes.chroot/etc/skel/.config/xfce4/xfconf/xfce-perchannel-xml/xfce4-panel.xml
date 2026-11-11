@@ -13,6 +13,12 @@
       <property name="mode" type="uint" value="0"/>
       <property name="autohide-behavior" type="uint" value="0"/>
       <property name="background-style" type="uint" value="1"/>
+      <property name="background-color" type="array">
+        <value type="double" value="0.043"/>
+        <value type="double" value="0.071"/>
+        <value type="double" value="0.125"/>
+        <value type="double" value="0.96"/>
+      </property>
       <property name="plugin-ids" type="array">
         <value type="int" value="1"/>
         <value type="int" value="2"/>
@@ -20,6 +26,7 @@
         <value type="int" value="4"/>
         <value type="int" value="5"/>
         <value type="int" value="6"/>
+        <value type="int" value="7"/>
       </property>
     </property>
   </property>
@@ -29,7 +36,8 @@
     <property name="plugin-3" type="string" value="tasklist"/>
     <property name="plugin-4" type="string" value="separator"/>
     <property name="plugin-5" type="string" value="systray"/>
-    <property name="plugin-6" type="string" value="clock"/>
+    <property name="plugin-6" type="string" value="pulseaudio"/>
+    <property name="plugin-7" type="string" value="clock"/>
   </property>
   <property name="plugin-1" type="empty">
     <property name="button-title" type="string" value="Aero"/>
@@ -48,5 +56,12 @@
   <property name="plugin-4" type="empty">
     <property name="expand" type="bool" value="true"/>
     <property name="style" type="uint" value="0"/>
+  </property>
+  <property name="plugin-6" type="empty">
+    <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
+  </property>
+  <property name="plugin-7" type="empty">
+    <property name="digital-format" type="string" value="%a %d %b  %I:%M %p"/>
+    <property name="tooltip-format" type="string" value="%A, %d %B %Y"/>
   </property>
 </channel>
