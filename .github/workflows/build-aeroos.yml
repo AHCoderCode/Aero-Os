@@ -33,8 +33,12 @@ jobs:
               apt-get update
               apt-get install -y --no-install-recommends \
                 live-build debootstrap xorriso isolinux syslinux-common \
-                squashfs-tools dosfstools mtools ca-certificates gpgv
+                squashfs-tools dosfstools mtools ca-certificates gpgv libxml2-utils
               chmod +x auto/config
+              sh -n auto/config
+              sh -n config/includes.chroot/usr/local/bin/aeroos-welcome
+              sh -n config/hooks/normal/9990-aeroos-finish.hook.chroot
+              ./scripts/validate-config.sh
               ./auto/config
               lb config --dump
               lb build 2>&1 | tee build.log

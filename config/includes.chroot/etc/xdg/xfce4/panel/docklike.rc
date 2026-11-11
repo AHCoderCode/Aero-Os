@@ -1,5 +1,5 @@
 [user]
-# Keep previews disabled by default to reduce overhead on the i5-480M.
+# Disable window previews to keep memory overhead low on the reference laptop.
 showPreviews=false
 forceIconSize=true
 iconSize=38

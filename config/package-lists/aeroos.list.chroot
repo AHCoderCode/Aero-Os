@@ -26,6 +26,10 @@ xfce4-notifyd
 
 # Networking, radio and firmware
 network-manager
+dbus-x11
+policykit-1
+udisks2
+xdg-utils
 network-manager-gnome
 wpasupplicant
 wireless-tools
