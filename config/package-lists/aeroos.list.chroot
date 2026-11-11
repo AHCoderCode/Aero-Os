@@ -1,0 +1,77 @@
+# Debian Live foundation
+live-boot
+live-config
+live-config-systemd
+live-tools
+linux-image-amd64
+systemd-sysv
+sudo
+user-setup
+
+# Lightweight graphical desktop
+xorg
+xserver-xorg-video-intel
+xserver-xorg-video-radeon
+lightdm
+lightdm-gtk-greeter
+xfce4
+xfce4-whiskermenu-plugin
+xfce4-terminal
+xfce4-taskmanager
+xfce4-power-manager
+xfce4-screenshooter
+xfce4-pulseaudio-plugin
+xfce4-notifyd
+
+# Networking, radio and firmware
+network-manager
+network-manager-gnome
+wpasupplicant
+wireless-tools
+rfkill
+bluez
+blueman
+firmware-linux-nonfree
+firmware-amd-graphics
+firmware-brcm80211
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+intel-microcode
+
+# Audio, battery and memory
+alsa-utils
+pulseaudio
+pavucontrol
+acpi
+acpi-support
+upower
+zram-tools
+
+# Everyday applications
+firefox-esr
+thunar
+thunar-archive-plugin
+gvfs
+gvfs-backends
+gvfs-fuse
+file-roller
+mousepad
+ristretto
+parole
+galculator
+synaptic
+gparted
+zenity
+
+# Fonts, icons and basic tools
+fonts-cantarell
+fonts-dejavu-core
+fonts-noto-core
+fonts-noto-color-emoji
+papirus-icon-theme
+adwaita-icon-theme
+ca-certificates
+curl
+wget
+git

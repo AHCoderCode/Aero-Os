@@ -1,0 +1,56 @@
+name: Build AeroOS ISO
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aeroos-iso-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Debian Live hybrid ISO
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build inside Debian Trixie
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --privileged --rm \
+            -e DEBIAN_FRONTEND=noninteractive \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            -w /workspace \
+            debian:trixie bash -euxo pipefail -c '
+              apt-get update
+              apt-get install -y --no-install-recommends \
+                live-build debootstrap xorriso isolinux syslinux-common \
+                squashfs-tools dosfstools mtools ca-certificates gpgv
+              chmod +x auto/config
+              ./auto/config
+              lb config --dump
+              lb build 2>&1 | tee build.log
+              test -s live-image-amd64.hybrid.iso
+              sha256sum live-image-amd64.hybrid.iso > live-image-amd64.hybrid.iso.sha256
+              ls -lh live-image-amd64.hybrid.iso live-image-amd64.hybrid.iso.sha256
+            '
+
+      - name: Upload ISO and build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: AeroOS-ISO
+          path: |
+            live-image-amd64.hybrid.iso
+            live-image-amd64.hybrid.iso.sha256
+            build.log
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14

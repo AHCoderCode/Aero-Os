@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+# Reproducible Debian Live configuration. Syslinux creates Legacy-BIOS boot media.
+lb config noauto \
+  --mode debian \
+  --distribution trixie \
+  --architectures amd64 \
+  --binary-image iso-hybrid \
+  --bootloaders syslinux \
+  --archive-areas "main contrib non-free-firmware" \
+  --debian-installer false \
+  --system live \
+  --apt-recommends true \
+  --bootappend-live "boot=live components persistence username=aero hostname=aeroos locales=en_US.UTF-8 keyboard-layouts=us quiet splash live-config.user-default-groups=audio,cdrom,dip,floppy,video,plugdev,netdev,powerdev,scanner,bluetooth,fuse" \
+  --iso-application "AeroOS Live" \
+  --iso-preparer "AeroOS build pipeline" \
+  --iso-publisher "AeroOS Project" \
+  --iso-volume "AEROOS_LIVE" \
+  "$@"

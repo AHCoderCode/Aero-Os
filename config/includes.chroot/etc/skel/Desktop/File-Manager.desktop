@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=File Manager
+Comment=Browse your files
+Exec=thunar
+Icon=system-file-manager
+Terminal=false
+Categories=System;FileTools;

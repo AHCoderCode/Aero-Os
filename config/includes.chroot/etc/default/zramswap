@@ -1,0 +1,4 @@
+# Modest compressed swap for the 8 GB reference laptop.
+ALGO=zstd
+PERCENT=25
+PRIORITY=100

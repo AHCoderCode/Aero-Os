@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Welcome to AeroOS
+Comment=Read the first-start guide
+Exec=aeroos-welcome
+Icon=aeroos
+Terminal=false
+Categories=System;

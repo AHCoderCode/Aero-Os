@@ -1,0 +1,40 @@
+/* AeroOS cool dark surfaces and subtle blue-violet accents. */
+@define-color aero_bg #0b1220;
+@define-color aero_surface #151f30;
+@define-color aero_surface_hi #202d43;
+@define-color aero_border #34445e;
+@define-color aero_text #eaf0fb;
+@define-color aero_accent #8b9cff;
+@define-color aero_accent_hi #a8b5ff;
+
+window, .background { background-color: @aero_bg; color: @aero_text; }
+headerbar, .titlebar {
+  background-image: linear-gradient(to bottom, #1b2940, #131e30);
+  color: @aero_text; border-color: @aero_border; box-shadow: none;
+}
+button {
+  background-image: none; background-color: @aero_surface_hi;
+  color: @aero_text; border: 1px solid @aero_border;
+  border-radius: 9px; padding: 6px 11px; box-shadow: none;
+}
+button:hover { background-color: #2b3b59; border-color: @aero_accent; }
+button:checked, button:active { background-color: #35456b; border-color: @aero_accent; }
+entry, spinbutton, combobox, textview, .view, treeview.view {
+  background-color: #0f1929; color: @aero_text;
+  border-color: @aero_border; border-radius: 7px; caret-color: @aero_accent_hi;
+}
+*:selected, .view:selected, .view:selected:focus { background-color: #33456f; color: #fff; }
+menubar, menu, .context-menu, popover { background-color: @aero_surface; color: @aero_text; }
+menuitem:hover { background-color: #293a58; color: #fff; }
+tooltip {
+  background-color: #202d43; color: @aero_text;
+  border: 1px solid @aero_border; border-radius: 7px;
+}
+#XfcePanelWindow {
+  background-color: rgba(11, 18, 32, 0.96); color: @aero_text;
+  border-top: 1px solid rgba(139, 156, 255, 0.38);
+}
+#whiskermenu-window {
+  background-color: #131e30; color: @aero_text;
+  border: 1px solid @aero_border; border-radius: 12px;
+}
