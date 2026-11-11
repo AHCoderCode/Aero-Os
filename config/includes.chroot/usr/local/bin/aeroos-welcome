@@ -13,6 +13,9 @@ Included applications:
 • Synaptic — package manager
 • Xfce Settings — display, keyboard, power and desktop controls
 
+Your account:
+The temporary Live account is 'aero'. Debian Live's default temporary password is 'live'. Open Terminal and run 'passwd' after startup to set a private password before using AeroOS for sensitive work.
+
 Persistence:
 Full persistence requires an ext4 USB volume labelled 'persistence' containing persistence.conf with this line:
 / union
@@ -21,12 +24,10 @@ Hardware:
 This first version targets 64-bit PCs and traditional Legacy BIOS. Wi-Fi, graphics acceleration, suspend and special function keys must be checked on the actual laptop.
 
 Safety:
-This is an experimental Live USB. It does not install itself to your internal drive. Do not run an installer or partitioning tool unless you know exactly which disk is selected.
-
-The temporary Live account is 'aero'. Change its password before using the system for sensitive work."
+This is an experimental Live USB. It does not install itself to your internal drive. Do not run an installer or partitioning tool unless you know exactly which disk is selected."
 
 if command -v zenity >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
-  zenity --info --title="Welcome to AeroOS" --window-icon="aeroos" --width=560 --height=440 --text="$MESSAGE"
+  zenity --info --title="Welcome to AeroOS" --window-icon="aeroos" --width=560 --height=460 --text="$MESSAGE"
 else
   printf '%s\n' "$MESSAGE"
 fi

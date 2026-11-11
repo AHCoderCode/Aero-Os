@@ -8,8 +8,9 @@ First hardware target: HP ProBook 4520s — Intel Core i5-480M (2 cores / 4 thre
 
 A Debian 13 (Trixie) Live system using Debian's official Live toolchain:
 - amd64 Linux kernel and Syslinux/ISOLINUX hybrid media for Legacy BIOS boot
-- Xfce + LightDM for a relatively light graphical desktop
+- Xfce + LightDM for a comparatively light graphical desktop
 - AeroOS dark-blue styling, custom wallpaper, Aero launcher and desktop shortcuts
+- Windows-key Start menu shortcut, task list, system tray, volume and clock controls
 - NetworkManager, sound controls, Bluetooth utilities, power tools and everyday applications
 - zram configured with a conservative 25% RAM cap
 - Debian Live persistence enabled; the intended full-persistence setting is `/ union`
@@ -64,6 +65,10 @@ The partition must be created in the space left after writing the hybrid ISO. Wi
 - Exact Wi-Fi hardware is still unknown; its Windows Device Manager hardware ID is needed to confirm the right firmware.
 - zram is compressed swap, not extra physical RAM.
 - The old CPU and USB flash drive will not perform like a modern SSD; browser-heavy workloads can still use significant memory.
+
+## Default Live account
+
+The temporary account is `aero`; the default Debian Live password is `live`. Change it immediately after startup with `passwd`. Persistence means this password change is retained across reboots, so choose a password you will remember.
 
 ## Layout
 

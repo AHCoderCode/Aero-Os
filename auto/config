@@ -12,7 +12,7 @@ lb config noauto \
   --debian-installer false \
   --system live \
   --apt-recommends true \
-  --bootappend-live "boot=live components persistence username=aero hostname=aeroos locales=en_US.UTF-8 keyboard-layouts=us quiet splash live-config.user-default-groups=audio,cdrom,dip,floppy,video,plugdev,netdev,powerdev,scanner,bluetooth,fuse" \
+  --bootappend-live "boot=live components persistence username=aero hostname=aeroos locales=en_US.UTF-8 keyboard-layouts=us quiet splash live-config.user-default-groups=audio,cdrom,dip,floppy,video,plugdev,netdev,powerdev,scanner,bluetooth,fuse,sudo" \
   --iso-application "AeroOS Live" \
   --iso-preparer "AeroOS build pipeline" \
   --iso-publisher "AeroOS Project" \
