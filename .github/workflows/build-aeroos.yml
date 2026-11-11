@@ -33,7 +33,7 @@ jobs:
               apt-get update
               apt-get install -y --no-install-recommends \
                 live-build debootstrap xorriso isolinux syslinux-common \
-                squashfs-tools dosfstools mtools ca-certificates gpgv libxml2-utils python3-minimal
+                squashfs-tools dosfstools mtools ca-certificates gpgv libxml2-utils python3
               chmod +x auto/config
               sh -n auto/config
               sh -n config/includes.chroot/usr/local/bin/aeroos-welcome
