@@ -111,6 +111,12 @@ if autostart.is_file():
 welcome = (ROOT / "config/includes.chroot/usr/local/bin/aeroos-welcome").read_text(encoding="utf-8")
 require("welcome-shown" in welcome, "Welcome autostart must remember dismissal when persistence is enabled.")
 
+parser_path = ROOT / "config/includes.chroot/usr/local/lib/aeroos/persistence-free-space.awk"
+require(parser_path.is_file(), "The persistence free-space parser is missing.")
+if parser_path.is_file():
+    require("free_end + 0 > free_start + 0" in parser_path.read_text(encoding="utf-8"),
+            "Persistence parser must compare byte offsets numerically.")
+
 persistence_script = ROOT / "config/includes.chroot/usr/local/sbin/aeroos-setup-persistence"
 require(persistence_script.is_file(), "The guarded persistence setup utility is missing.")
 if persistence_script.is_file():

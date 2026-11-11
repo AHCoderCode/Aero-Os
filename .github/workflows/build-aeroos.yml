@@ -41,6 +41,7 @@ jobs:
               sh -n config/hooks/normal/9990-aeroos-finish.hook.chroot
               python3 scripts/validate-config.py
               ./scripts/validate-config.sh
+              ./scripts/test-persistence-parser.sh
               ./auto/config
               lb config --dump
               lb build 2>&1 | tee build.log

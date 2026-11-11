@@ -111,32 +111,7 @@ if [[ "$partition_table" == "dos" ]] && (( partition_count >= 4 )); then
   fail "The USB's MBR partition table has no free primary partition slot. No changes were made."
 fi
 
-free_info="$(
-  parted -m -s "$disk" unit B print free 2>/dev/null |
-    awk -F: '
-      /^\/dev\// {
-        total = $2
-        gsub(/[^0-9]/, "", total)
-      }
-      /Free Space/ {
-        start = $2
-        end = $3
-        gsub(/[^0-9]/, "", start)
-        gsub(/[^0-9]/, "", end)
-        if (total > 0 && end >= total - 4194304 && end > start) {
-          free_start = start
-          free_bytes = end - start + 1
-        }
-      }
-      END {
-        if (free_start != "" && free_bytes >= 536870912) {
-          printf "%s %s\n", free_start, free_bytes
-        } else {
-          exit 1
-        }
-      }
-    '
-)" || fail "Could not verify at least 512 MiB of unallocated space at the end of the AeroOS USB. No changes were made."
+free_info="$(parted -m -s "$disk" unit B print free 2>/dev/null | awk -f /usr/local/lib/aeroos/persistence-free-space.awk)" || fail "Could not verify at least 512 MiB of unallocated space at the end of the AeroOS USB. No changes were made."
 
 read -r free_start free_bytes <<< "$free_info"
 free_gib="$(awk -v bytes="$free_bytes" 'BEGIN { printf "%.1f", bytes / 1024 / 1024 / 1024 }')"
