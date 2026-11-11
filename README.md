@@ -10,7 +10,7 @@ A Debian 13 (Trixie) Live system using Debian's official Live toolchain:
 - amd64 Linux kernel and Syslinux/ISOLINUX hybrid media for Legacy BIOS boot
 - Xfce + LightDM for a comparatively light graphical desktop
 - AeroOS dark-blue styling, custom wallpaper, Aero launcher and desktop shortcuts
-- Windows-key Start menu shortcut, task list, system tray, volume and clock controls
+- Windows-key Start menu shortcut, a centered Docklike taskbar with pinned Firefox, Thunar and Terminal launchers, system tray, volume and clock controls
 - NetworkManager, sound controls, Bluetooth utilities, power tools and everyday applications
 - zram configured with a conservative 25% RAM cap
 - Debian Live persistence enabled; the intended full-persistence setting is `/ union`

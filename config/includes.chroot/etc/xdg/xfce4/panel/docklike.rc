@@ -1,0 +1,9 @@
+[user]
+# Keep previews disabled by default to reduce overhead on the i5-480M.
+showPreviews=false
+forceIconSize=true
+iconSize=38
+showWindowCount=false
+disableLauncherCounts=true
+indicatorColorFromTheme=true
+pinned=firefox-esr.desktop;thunar.desktop;xfce4-terminal.desktop;
