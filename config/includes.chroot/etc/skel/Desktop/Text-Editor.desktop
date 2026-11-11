@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Text Editor
+Comment=Create and edit text files
+Exec=mousepad %F
+Icon=accessories-text-editor
+Terminal=false
+Categories=Utility;TextEditor;

@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build inside Debian Trixie
         shell: bash
@@ -37,6 +37,7 @@ jobs:
               chmod +x auto/config
               sh -n auto/config
               sh -n config/includes.chroot/usr/local/bin/aeroos-welcome
+              bash -n config/includes.chroot/usr/local/sbin/aeroos-setup-persistence
               sh -n config/hooks/normal/9990-aeroos-finish.hook.chroot
               python3 scripts/validate-config.py
               ./scripts/validate-config.sh
@@ -44,18 +45,21 @@ jobs:
               lb config --dump
               lb build 2>&1 | tee build.log
               test -s live-image-amd64.hybrid.iso
+              xorriso -indev live-image-amd64.hybrid.iso -report_el_torito plain 2>&1 | tee iso-boot-report.txt
+              grep -qi "BIOS" iso-boot-report.txt
               sha256sum live-image-amd64.hybrid.iso > live-image-amd64.hybrid.iso.sha256
-              ls -lh live-image-amd64.hybrid.iso live-image-amd64.hybrid.iso.sha256
+              ls -lh live-image-amd64.hybrid.iso live-image-amd64.hybrid.iso.sha256 iso-boot-report.txt
             '
 
-      - name: Upload ISO and build log
-        uses: actions/upload-artifact@v4
+      - name: Upload ISO and verification logs
+        uses: actions/upload-artifact@v7
         with:
           name: AeroOS-ISO
           path: |
             live-image-amd64.hybrid.iso
             live-image-amd64.hybrid.iso.sha256
+            iso-boot-report.txt
             build.log
           if-no-files-found: error
           compression-level: 0
-          retention-days: 14
+          retention-days: 30

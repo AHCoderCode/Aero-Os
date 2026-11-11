@@ -1,83 +1,99 @@
 # AeroOS
 
-**AeroOS is an experimental lightweight, Windows-inspired Linux desktop for older 64-bit laptops.**
+**AeroOS 0.2.0-alpha** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
 
-First hardware target: HP ProBook 4520s — Intel Core i5-480M (2 cores / 4 threads, 2.67 GHz), 8 GB RAM, Legacy BIOS, and a user-reported AMD Radeon HD 64xx-family GPU (exact PCI model still unknown).
+It is a bootable operating-system image, not a website or desktop mock-up. It runs from a USB drive and does not install to or repartition the laptop's internal Windows drive.
 
-## What this repository builds
+## Build and verification status
 
-A Debian 13 (Trixie) Live system using Debian's official Live toolchain:
-- amd64 Linux kernel and Syslinux/ISOLINUX hybrid media for Legacy BIOS boot
-- Xfce + LightDM for a comparatively light graphical desktop
-- AeroOS dark-blue styling, custom wallpaper, Aero launcher and desktop shortcuts
-- Windows-key Start menu shortcut, a centered Docklike taskbar with pinned Firefox, Thunar and Terminal launchers, system tray, volume and clock controls
-- NetworkManager, sound controls, Bluetooth utilities, power tools and everyday applications
-- zram configured with a conservative 25% RAM cap
-- Debian Live persistence enabled; the intended full-persistence setting is `/ union`
+- Debian 13 Trixie amd64 Live ISO: built successfully by GitHub Actions.
+- Legacy BIOS hybrid ISO: produced by the current build configuration.
+- Source/configuration checks: run during every build.
+- Actual HP ProBook hardware test: still required. Wi-Fi, audio, graphics acceleration, suspend/resume, brightness keys and USB boot behavior cannot be certified by CI alone.
 
-Debian 13 Trixie is the current stable Debian release: https://www.debian.org/releases/stable/
+Until the HP is tested, this remains an experimental alpha rather than a finished, hardware-certified OS.
 
-## Status: experimental alpha
+## Desktop and included apps
 
-This is a genuine Linux Live OS build configuration, not a browser mock-up. It is **not yet a finished or hardware-verified operating system**. A successful CI build proves only that an ISO was produced. Wi-Fi, graphics acceleration, audio, suspend/resume, brightness keys and other devices must be tested on the actual HP.
+The desktop uses Xfce and LightDM, customized with AeroOS wallpaper, dark blue styling, a centered Docklike taskbar, an Aero Start menu, system tray, volume control and clock. Compositing and GTK animations are disabled by default to reduce overhead on the older graphics hardware.
 
-The image has no automatic internal-drive installer. The first milestone is USB-only testing, leaving Windows untouched.
+Included applications and tools:
+
+- **File Explorer:** Thunar, removable-drive browsing and archive support.
+- **Web browser:** Firefox ESR.
+- **App Store / package manager:** Synaptic.
+- **Settings:** Xfce Settings Manager, display, keyboard, power and desktop controls.
+- **Terminal:** Xfce Terminal.
+- **Calculator:** Galculator.
+- **Text editor:** Mousepad.
+- **Media player:** Parole.
+- **System monitor:** Xfce Task Manager.
+- **Power menu:** Xfce session logout/shutdown controls.
+- **Networking and devices:** NetworkManager, Wi-Fi firmware families, Bluetooth utilities, audio controls and removable storage support.
+
+A one-time **Set Up Persistence** utility is included for creating the full-persistence area on the AeroOS USB.
+
+## Hardware profile
+
+- Architecture: amd64 (64-bit Intel).
+- Desktop: Xfce + LightDM.
+- Firmware: Legacy BIOS / Syslinux hybrid media.
+- Memory: zram uses a conservative 25% RAM cap with zstd compression.
+- Graphics: Intel and legacy Radeon X.Org drivers plus Debian firmware packages.
+- Performance defaults: compositing disabled, GTK animations disabled, dock previews disabled.
+
+The exact Radeon PCI ID and Wi-Fi adapter are not yet confirmed. See [docs/HARDWARE-TARGET.md](docs/HARDWARE-TARGET.md).
 
 ## Build the ISO
 
 GitHub Actions runs **Build AeroOS ISO** on pushes to `main` and on manual dispatch.
 
 1. Open the repository's **Actions** tab.
-2. Open the newest **Build AeroOS ISO** run.
-3. Download the `AeroOS-ISO` artifact and extract it.
-4. Verify the ISO with its included SHA-256 file.
+2. Open the newest successful **Build AeroOS ISO** run.
+3. Download and extract the `AeroOS-ISO` artifact.
+4. Verify the ISO using `live-image-amd64.hybrid.iso.sha256`.
+5. The ISO is `live-image-amd64.hybrid.iso`.
 
-Expected ISO: `live-image-amd64.hybrid.iso`.
+The artifact also includes the build log and El Torito boot report. The workflow retains artifacts for 30 days.
 
 Build locally on Debian Trixie amd64 with root access:
 
 ```bash
 sudo apt update
-sudo apt install live-build debootstrap xorriso isolinux syslinux-common squashfs-tools dosfstools mtools
+sudo apt install live-build debootstrap xorriso isolinux syslinux-common squashfs-tools dosfstools mtools ca-certificates gpgv libxml2-utils python3
 ./auto/config
 sudo lb build
 ```
 
-## USB and persistence
+## USB boot and maximum practical persistence
 
-Read [docs/USB-AND-PERSISTENCE.md](docs/USB-AND-PERSISTENCE.md) **before writing the image**.
+Read [docs/USB-AND-PERSISTENCE.md](docs/USB-AND-PERSISTENCE.md) before writing the image.
 
-The ISO enables the `persistence` boot option. For full-root persistence, Debian Live requires a separate ext4 volume labelled `persistence` with a root-level `persistence.conf` containing:
+AeroOS boots with Debian Live's `persistence` option. Full-root persistence uses an ext4 partition labelled `persistence` with a root-level `persistence.conf` containing:
 
 ```text
 / union
 ```
 
-The partition must be created in the space left after writing the hybrid ISO. Windows normally cannot browse ext4; this is expected.
+The new setup utility can create that partition in the unused space at the end of the same USB. For safety, it requires a one-time `toram` boot so the USB is not in use while its partition table is changed. It will only proceed when it identifies the AeroOS-labeled removable drive, the capacity is between 8 and 32 GiB, and every partition on that drive is unmounted. It refuses ambiguous or unsupported layouts.
 
-**Writing a hybrid ISO erases the USB.** Back up the USB and verify the artifact first. Never select the laptop's internal drive in a disk/partition tool.
+Full persistence saves the writable system overlay: personal files, settings, installed packages and system changes. The USB's capacity is finite; the persistence partition uses the available space left after the ISO.
 
-## Hardware notes
-
-- `amd64` is the correct architecture for the 64-bit Intel Core i5-480M.
-- The build uses Debian's generic kernel, not a custom patched kernel.
-- Intel and Radeon X.Org drivers plus common Debian firmware packages are included.
-- Exact Wi-Fi hardware is still unknown; its Windows Device Manager hardware ID is needed to confirm the right firmware.
-- zram is compressed swap, not extra physical RAM.
-- The old CPU and USB flash drive will not perform like a modern SSD; browser-heavy workloads can still use significant memory.
+**Writing the ISO erases the USB.** Back up its contents first. Never select the laptop's internal disk in a disk tool. Windows normally cannot read the resulting ext4 persistence partition; do not format it when Windows prompts.
 
 ## Default Live account
 
-The temporary account is `aero`; the default Debian Live password is `live`. Change it immediately after startup with `passwd`. Persistence means this password change is retained across reboots, so choose a password you will remember.
+The temporary account is `aero`. Debian Live's default password is `live`; the desktop auto-logs in for this USB session. Open Terminal and run `passwd` to set a private password. With full persistence enabled, the password change is retained across restarts.
 
 ## Layout
 
 - `auto/config` — reproducible Debian Live configuration
 - `config/package-lists/` — desktop, firmware and utility packages
-- `config/includes.chroot/` — AeroOS theme and system defaults
-- `config/hooks/` — branding and image cleanup
+- `config/includes.chroot/` — AeroOS theme, launchers and system defaults
+- `config/hooks/` — image finalization
+- `scripts/` — source/configuration validation
 - `.github/workflows/` — automated ISO builder
-- `docs/` — hardware and USB/persistence notes
+- `docs/` — hardware and USB/persistence instructions
 
 ## License
 

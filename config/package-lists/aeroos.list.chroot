@@ -70,6 +70,10 @@ galculator
 synaptic
 zenity
 
+# USB persistence setup (one-time, toram-only operation)
+parted
+e2fsprogs
+
 # Fonts, icons and basic tools
 fonts-cantarell
 fonts-dejavu-core

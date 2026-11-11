@@ -8,9 +8,11 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 ERRORS = []
 
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         ERRORS.append(message)
+
 
 # Parse every XML file and report the precise file that is malformed.
 for path in (ROOT / "config" / "includes.chroot").rglob("*.xml"):
@@ -57,11 +59,13 @@ except (ET.ParseError, OSError) as exc:
 
 packages = (ROOT / "config/package-lists/aeroos.list.chroot").read_text(encoding="utf-8")
 for package in ("xfce4", "xfce4-whiskermenu-plugin", "xfce4-docklike-plugin",
-                "network-manager", "firmware-amd-graphics", "firefox-esr"):
+                "network-manager", "firmware-amd-graphics", "firefox-esr",
+                "parted", "e2fsprogs", "zenity", "synaptic", "galculator",
+                "mousepad", "parole", "xfce4-taskmanager"):
     require(re.search(rf"(?m)^{re.escape(package)}$", packages) is not None,
             f"Required package missing: {package}")
 require(re.search(r"(?m)^gparted$", packages) is None,
-        "Do not include the partition editor in the initial live image.")
+        "Do not include a general-purpose partition editor in the live image.")
 
 dock_file = ROOT / "config/includes.chroot/etc/xdg/xfce4/panel/docklike.rc"
 dock_text = dock_file.read_text(encoding="utf-8")
@@ -72,6 +76,47 @@ auto = (ROOT / "auto/config").read_text(encoding="utf-8")
 require("--distribution trixie" in auto and "--architectures amd64" in auto,
         "The image must target Debian Trixie amd64.")
 require("persistence" in auto, "The Live image must enable persistence boot discovery.")
+
+# Verify the desktop shortcuts point to applications present in the image.
+desktop_dir = ROOT / "config/includes.chroot/etc/skel/Desktop"
+launchers = {
+    "File-Manager.desktop": ("Exec=thunar", "thunar"),
+    "Settings.desktop": ("Exec=xfce4-settings-manager", "xfce4"),
+    "Web-Browser.desktop": ("Exec=firefox-esr %u", "firefox-esr"),
+    "Welcome-to-AeroOS.desktop": ("Exec=aeroos-welcome", "zenity"),
+    "App-Store.desktop": ("Exec=synaptic-pkexec", "synaptic"),
+    "Calculator.desktop": ("Exec=galculator", "galculator"),
+    "Text-Editor.desktop": ("Exec=mousepad %F", "mousepad"),
+    "Media-Player.desktop": ("Exec=parole %U", "parole"),
+    "System-Monitor.desktop": ("Exec=xfce4-taskmanager", "xfce4-taskmanager"),
+    "Set-Up-Persistence.desktop": ("Exec=pkexec /usr/local/sbin/aeroos-setup-persistence", "parted"),
+}
+for filename, (exec_line, package) in launchers.items():
+    path = desktop_dir / filename
+    require(path.is_file(), f"Missing desktop launcher: {filename}")
+    if path.is_file():
+        content = path.read_text(encoding="utf-8")
+        require("[Desktop Entry]" in content and exec_line in content,
+                f"{filename} has an invalid desktop entry or Exec command.")
+    require(re.search(rf"(?m)^{re.escape(package)}$", packages) is not None,
+            f"{filename} requires missing package {package}.")
+
+autostart = ROOT / "config/includes.chroot/etc/xdg/autostart/aeroos-welcome.desktop"
+require(autostart.is_file(), "AeroOS first-start welcome autostart is missing.")
+if autostart.is_file():
+    auto_text = autostart.read_text(encoding="utf-8")
+    require("Exec=aeroos-welcome --autostart" in auto_text,
+            "Welcome autostart must use the one-time mode.")
+
+welcome = (ROOT / "config/includes.chroot/usr/local/bin/aeroos-welcome").read_text(encoding="utf-8")
+require("welcome-shown" in welcome, "Welcome autostart must remember dismissal when persistence is enabled.")
+
+persistence_script = ROOT / "config/includes.chroot/usr/local/sbin/aeroos-setup-persistence"
+require(persistence_script.is_file(), "The guarded persistence setup utility is missing.")
+if persistence_script.is_file():
+    setup_text = persistence_script.read_text(encoding="utf-8")
+    for guard in ("toram", "AEROOS_LIVE", "blockdev --getsize64", "RM", "parted", "mkfs.ext4", "/ union"):
+        require(guard in setup_text, f"Persistence setup is missing safety/configuration check: {guard}")
 
 if ERRORS:
     print("AeroOS configuration validation failed:", file=sys.stderr)

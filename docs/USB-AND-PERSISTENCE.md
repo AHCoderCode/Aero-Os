@@ -7,53 +7,91 @@
 - The first boot is a Live USB test only. Do not install AeroOS to the internal disk.
 - A successful ISO build does not prove the laptop's hardware works.
 
-## Full persistence
+## Download and verify the ISO from Windows 10
 
-AeroOS enables these Debian Live boot options:
+1. Open the repository's **Actions** tab.
+2. Open the newest successful **Build AeroOS ISO** run.
+3. Download the `AeroOS-ISO` artifact and extract the ZIP.
+4. Open PowerShell in the extracted folder and run:
 
-```text
-boot=live components persistence username=aero
+```powershell
+$line = Get-Content .\live-image-amd64.hybrid.iso.sha256 | Select-Object -First 1
+$expected = ($line -split '\s+')[0].ToLowerInvariant()
+$actual = (Get-FileHash .\live-image-amd64.hybrid.iso -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($expected -ne $actual) { throw "ISO checksum does not match. Do not write this file to USB." }
+"ISO checksum verified."
 ```
 
-For full-root persistence, the separate persistence volume must:
-1. Use an ext4 filesystem.
-2. Have the filesystem label `persistence`.
-3. Contain a file named `persistence.conf` at the filesystem root.
-4. Have this exact line in that file:
+The ISO file is named `live-image-amd64.hybrid.iso`.
+
+## Write the bootable USB
+
+1. Open Rufus and select the USB by its capacity (your drive was reported as about 14.6 GB).
+2. Select `live-image-amd64.hybrid.iso` as the boot selection.
+3. Start the write. If Rufus asks for ISO mode or DD mode, choose **DD mode** for this hybrid image.
+4. Confirm only after checking that the selected target is your USB. This erases the USB.
+5. Wait for Rufus to finish and safely eject the USB.
+
+Do not select the laptop's internal drive at any stage.
+
+## First boot on the HP ProBook 4520s
+
+1. Shut down Windows completely.
+2. Insert the AeroOS USB.
+3. Power on and tap **F9** to open the HP boot-device menu (the key can vary by BIOS revision).
+4. Select the USB device.
+5. Choose the normal AeroOS Live entry.
+6. The desktop automatically signs in to the temporary user `aero`.
+
+To return to Windows, shut down AeroOS, wait for the laptop to turn off, remove the USB, and power on again.
+
+## Set up maximum persistence on the same USB
+
+The ISO enables Debian Live's `persistence` boot option, but full persistence becomes active only after a separate ext4 area labelled `persistence` has been created with a root-level `persistence.conf` containing exactly:
 
 ```text
 / union
 ```
 
-This saves runtime changes across reboots, including the live user's home, desktop settings and package changes. Installed applications and updates use the same finite USB space.
+AeroOS includes a guarded utility to create this area in the unused space at the end of the same USB. Use this one-time procedure:
 
-Official Debian Live documentation:
-https://live-team.pages.debian.net/live-manual/html/live-manual.en.html#persistence
+1. Restart and boot the AeroOS USB again.
+2. At the Syslinux boot menu, highlight the normal AeroOS entry and press **TAB** to edit its boot line.
+3. Add one space and the word `toram` to the end of the line, then press **Enter**.
+4. Wait for the desktop. The `toram` option copies the read-only live medium into RAM, so the USB can be safely partitioned. It makes this one boot slower and uses extra RAM; do not use it for normal daily boots.
+5. Open **Set Up Persistence** on the desktop. When the authorization prompt appears, enter the AeroOS user's password (`live` unless you have already changed it).
+6. Read the device summary carefully. The utility only continues for the removable drive containing the `AEROOS_LIVE` volume, with a capacity between 8 and 32 GiB, and only when all of that drive's partitions are unmounted. It creates an ext4 partition in trailing unallocated space and writes `persistence.conf` with `/ union`.
+7. When the success message appears, restart normally. Do not add `toram` on everyday boots.
 
-## Using the space left on the USB
+The setup tool is deliberately conservative. If your USB does not report itself as removable, the volume label is missing, the partition table is unsupported, or the free space cannot be verified, it refuses to make changes. Do not work around that refusal by selecting another disk or typing a guessed device path.
 
-After copying a hybrid ISO to a USB, its initial partition contains the live system. The remaining unallocated space can be made into a new ext4 partition and labelled `persistence`. Debian Live documents this workflow:
-https://live-team.pages.debian.net/live-manual/html/live-manual.en.html#using-the-space-left-on-a-usb-stick
+After the next normal boot, the Welcome screen should report **Full persistence is active**. Create a small test file in your home folder, restart normally, and check that it remains.
 
-Windows normally does not read ext4 in File Explorer. That is expected. Do not format an ext4 persistence partition just because Windows prompts you to.
+## What full persistence saves
 
-## Your 14.6 GB USB
+With the separate ext4 volume and `/ union` configuration, the writable Live system overlay is retained. This includes:
 
-The reported capacity is about 14.6 GB. The system image and full-root persistence must share this capacity. We must measure the final ISO before deciding how much space remains. Do not assume all 14.6 GB is available for personal files.
+- Personal files and folders.
+- Desktop settings, wallpaper and preferences.
+- Browser profile and saved browser settings.
+- Installed applications and package updates.
+- System configuration changes and your changed user password.
 
-Windows has no built-in ext4 formatter. A safe preparation workflow must be confirmed after the image has built. Until then, do not format, resize or repartition the USB.
+All of this uses the USB's finite capacity. The ISO occupies about 1.3 GiB in the current build; the rest of the drive is available for the persistence area, subject to partition alignment and filesystem overhead.
 
-## Boot the HP ProBook 4520s
+Windows normally cannot read ext4. If Windows asks to format the persistence volume, choose **Cancel**. Formatting it in Windows would erase persistence.
 
-1. Shut the laptop down completely.
-2. Insert the AeroOS USB.
-3. Power on and tap **F9** to open the HP boot-device menu (the key can vary by BIOS revision).
-4. Select the USB device.
-5. Choose the normal AeroOS Live entry.
-6. To return to Windows, shut down and remove the USB before powering on again.
+## Important notes
 
-If the USB is not listed, check that USB boot is enabled in BIOS. Do not change SATA mode or edit the internal drive's partitions.
+- Do not remove the USB while AeroOS is running. Shut down fully first.
+- The setup utility creates a partition only in the unused trailing area. It does not resize the ISO partition.
+- Full persistence is not encryption. Anyone with physical access to the USB may be able to access its saved data.
+- If the persistence setup utility refuses to continue, stop and share the exact message. Do not use Disk Management or another partition tool to guess at device numbers.
+- There is no automatic installer for the laptop's internal drive. The Windows installation is not modified by the USB boot process.
 
-## Shutdown
+## Debian Live references
 
-Use the desktop power menu and wait for the laptop to turn off before removing the USB. Removing it while AeroOS is running can corrupt the persistence filesystem and lose recent changes.
+- [Debian Live Manual — persistence](https://live-team.pages.debian.net/live-manual/html/live-manual.en.html#persistence)
+- [Debian live-boot manual — toram](https://manpages.debian.org/trixie/live-boot-doc/live-boot.7.en.html)
+
+The Debian Live manual explains that `/ union` makes the complete writable overlay persistent and that `toram` copies the read-only medium into RAM before the root filesystem is mounted.

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AeroOS Welcome
+Comment=Show the first-start AeroOS guide once
+Exec=aeroos-welcome --autostart
+Icon=aeroos
+Terminal=false
+OnlyShowIn=XFCE;
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

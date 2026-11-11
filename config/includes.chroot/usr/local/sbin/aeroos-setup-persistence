@@ -1,0 +1,202 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+APP_TITLE="AeroOS Persistence Setup"
+
+show_error() {
+  local message="$1"
+  if [[ -n "${DISPLAY:-}" ]] && command -v zenity >/dev/null 2>&1; then
+    zenity --error --title="$APP_TITLE" --width=560 --text="$message" || true
+  else
+    printf 'ERROR: %s\n' "$message" >&2
+  fi
+}
+
+show_info() {
+  local message="$1"
+  if [[ -n "${DISPLAY:-}" ]] && command -v zenity >/dev/null 2>&1; then
+    zenity --info --title="$APP_TITLE" --width=560 --text="$message"
+  else
+    printf '%s\n' "$message"
+  fi
+}
+
+fail() {
+  show_error "$1"
+  exit 1
+}
+
+if [[ "$EUID" -ne 0 ]]; then
+  fail "This utility needs administrator authorization. Open Set Up Persistence from the AeroOS desktop so the password prompt can authorize it."
+fi
+
+if [[ -z "${DISPLAY:-}" ]] || ! command -v zenity >/dev/null 2>&1; then
+  fail "Open Set Up Persistence from the AeroOS desktop. Do not run it from a text-only shell."
+fi
+
+if [[ ! -f /etc/aeroos-release ]]; then
+  fail "This does not appear to be an AeroOS session."
+fi
+
+if ! grep -Eq '(^|[[:space:]])toram([[:space:]]|$)' /proc/cmdline; then
+  fail "For safety, restart and boot once with toram. At the Syslinux menu, highlight AeroOS, press TAB, append toram to the boot line, then press Enter. This copies the live system into RAM before the USB is changed."
+fi
+
+for command_name in blkid lsblk blockdev parted partprobe mkfs.ext4 mount umount findmnt udevadm; do
+  command -v "$command_name" >/dev/null 2>&1 || fail "A required system tool is missing: $command_name."
+done
+
+mapfile -t live_devices < <(blkid -t LABEL=AEROOS_LIVE -o device 2>/dev/null | sort -u)
+if [[ "${#live_devices[@]}" -ne 1 ]]; then
+  fail "Could not identify exactly one partition labelled AEROOS_LIVE. No disk was changed. Check that this session was booted from the AeroOS USB written in DD mode."
+fi
+
+live_partition="$(readlink -f "${live_devices[0]}")"
+[[ -b "$live_partition" ]] || fail "The AeroOS Live volume is not a valid block device."
+
+live_type="$(lsblk -dnro TYPE "$live_partition" | head -n 1)"
+if [[ "$live_type" == "part" ]]; then
+  parent_name="$(lsblk -dnro PKNAME "$live_partition" | head -n 1)"
+  [[ -n "$parent_name" ]] || fail "Could not identify the physical USB device containing AeroOS."
+  disk="/dev/$parent_name"
+elif [[ "$live_type" == "disk" ]]; then
+  disk="$live_partition"
+else
+  fail "The AeroOS boot volume is not on a directly identifiable USB disk."
+fi
+
+[[ -b "$disk" ]] || fail "The identified USB disk is not available."
+
+removable="$(lsblk -dnro RM "$disk" | tr -d '[:space:]')"
+[[ "$removable" == "1" ]] || fail "The identified device does not report itself as removable. For safety, AeroOS will not partition it."
+
+disk_bytes="$(blockdev --getsize64 "$disk")"
+if (( disk_bytes < 8 * 1024 * 1024 * 1024 || disk_bytes > 32 * 1024 * 1024 * 1024 )); then
+  fail "The AeroOS USB must be between 8 and 32 GiB for this guided setup. The identified device is outside that range."
+fi
+
+disk_size="$(lsblk -dnro SIZE "$disk" | xargs)"
+disk_model="$(lsblk -dnro MODEL "$disk" | sed 's/[[:space:]]*$//')"
+partition_table="$(lsblk -dnro PTTYPE "$disk" | tr -d '[:space:]')"
+case "$partition_table" in
+  dos|gpt) ;;
+  *) fail "The AeroOS USB has an unsupported or unknown partition table. No changes were made." ;;
+esac
+
+# If a persistence volume already exists on this same USB, never reformat it.
+mapfile -t existing_persistence < <(blkid -t LABEL=persistence -o device 2>/dev/null | sort -u)
+for candidate in "${existing_persistence[@]}"; do
+  candidate="$(readlink -f "$candidate")"
+  candidate_type="$(lsblk -dnro TYPE "$candidate" 2>/dev/null | head -n 1 || true)"
+  if [[ "$candidate_type" == "part" ]]; then
+    candidate_parent="$(lsblk -dnro PKNAME "$candidate" | head -n 1)"
+    candidate_disk="/dev/$candidate_parent"
+  else
+    candidate_disk="$candidate"
+  fi
+  if [[ "$candidate_disk" == "$disk" ]]; then
+    show_info "This AeroOS USB already has a volume labelled persistence. No formatting or partition changes were made. Restart normally to use it."
+    exit 0
+  fi
+done
+
+# toram must have released every partition on the boot USB before we write its table.
+mounted_partitions="$(lsblk -nrpo MOUNTPOINT "$disk" | sed '/^[[:space:]]*$/d')"
+if [[ -n "$mounted_partitions" ]]; then
+  fail "A partition on the AeroOS USB is still mounted:\n$mounted_partitions\nNo changes were made. Restart and verify that toram is present in the boot line."
+fi
+
+partition_count="$(lsblk -nrpo TYPE "$disk" | awk '$1 == "part" { count++ } END { print count + 0 }')"
+if [[ "$partition_table" == "dos" ]] && (( partition_count >= 4 )); then
+  fail "The USB's MBR partition table has no free primary partition slot. No changes were made."
+fi
+
+free_info="$(
+  parted -m -s "$disk" unit B print free 2>/dev/null |
+    awk -F: '
+      /^\/dev\// {
+        total = $2
+        gsub(/[^0-9]/, "", total)
+      }
+      /Free Space/ {
+        start = $2
+        end = $3
+        gsub(/[^0-9]/, "", start)
+        gsub(/[^0-9]/, "", end)
+        if (total > 0 && end >= total - 4194304 && end > start) {
+          free_start = start
+          free_bytes = end - start + 1
+        }
+      }
+      END {
+        if (free_start != "" && free_bytes >= 536870912) {
+          printf "%s %s\n", free_start, free_bytes
+        } else {
+          exit 1
+        }
+      }
+    '
+)" || fail "Could not verify at least 512 MiB of unallocated space at the end of the AeroOS USB. No changes were made."
+
+read -r free_start free_bytes <<< "$free_info"
+free_gib="$(awk -v bytes="$free_bytes" 'BEGIN { printf "%.1f", bytes / 1024 / 1024 / 1024 }')"
+model_text="${disk_model:-USB flash drive}"
+
+confirmation="AeroOS identified this removable USB:
+
+Device: $disk
+Model: $model_text
+Capacity: $disk_size
+Unallocated space at end: about $free_gib GiB
+
+The utility will create one new ext4 partition using only that unallocated space and label it persistence. It will not resize or format the existing AeroOS boot partition.
+
+This is a disk-partition change. Continue only if the device and capacity above match your AeroOS USB."
+if ! zenity --question --title="$APP_TITLE" --width=600 --ok-label="Create persistence" --cancel-label="Cancel" --text="$confirmation"; then
+  exit 0
+fi
+
+before_parts="$(lsblk -lnpo NAME,TYPE "$disk" | awk '$2 == "part" { print $1 }')"
+if [[ "$partition_table" == "dos" ]]; then
+  parted -s -a optimal "$disk" unit B mkpart primary ext4 "${free_start}B" 100%
+else
+  parted -s -a optimal "$disk" unit B mkpart "AeroOS Persistence" ext4 "${free_start}B" 100%
+fi
+
+partprobe "$disk"
+udevadm settle
+
+after_parts="$(lsblk -lnpo NAME,TYPE "$disk" | awk '$2 == "part" { print $1 }')"
+after_count="$(printf '%s\n' "$after_parts" | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]')"
+expected_count=$((partition_count + 1))
+if [[ "$after_count" -ne "$expected_count" ]]; then
+  fail "The partition table was updated, but the new partition did not appear exactly as expected. Do not format any disk manually. Restart with toram and contact support with this message."
+fi
+
+new_partition="$(printf '%s\n' "$after_parts" | tail -n 1)"
+if printf '%s\n' "$before_parts" | grep -Fxq "$new_partition"; then
+  fail "The new partition could not be distinguished from existing partitions. No filesystem was created."
+fi
+
+new_partition_bytes="$(blockdev --getsize64 "$new_partition")"
+if (( new_partition_bytes < free_bytes - 134217728 )); then
+  fail "The new partition is smaller than the verified free area. No filesystem was created."
+fi
+
+# The new partition occupies only the unallocated trailing space confirmed above.
+mkfs.ext4 -F -L persistence "$new_partition"
+
+mount_dir="$(mktemp -d /mnt/aeroos-persistence.XXXXXX)"
+mount "$new_partition" "$mount_dir"
+printf '%s\n' '/ union' > "$mount_dir/persistence.conf"
+sync
+umount "$mount_dir"
+rmdir "$mount_dir"
+sync
+
+created_label="$(blkid -o value -s LABEL "$new_partition" 2>/dev/null || true)"
+[[ "$created_label" == "persistence" ]] || fail "The new filesystem was created, but its label could not be verified. Do not format anything else."
+
+show_info "Full-persistence storage is ready on $new_partition.
+
+Restart AeroOS normally, without toram. Keep the USB inserted. On the next boot, Debian Live should find the ext4 persistence volume and save your files, settings, installed applications and system changes across restarts."

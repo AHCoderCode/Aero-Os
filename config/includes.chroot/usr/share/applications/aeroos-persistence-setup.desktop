@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Set Up Persistence
+Comment=Create a full-persistence area on the AeroOS USB
+Exec=pkexec /usr/local/sbin/aeroos-setup-persistence
+Icon=drive-removable-media
+Terminal=false
+Categories=System;Settings;

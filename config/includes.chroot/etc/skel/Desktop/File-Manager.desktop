@@ -1,8 +1,8 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=File Manager
-Comment=Browse your files
+Name=File Explorer
+Comment=Browse your files, folders and USB drives
 Exec=thunar
 Icon=system-file-manager
 Terminal=false

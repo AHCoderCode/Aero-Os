@@ -1,33 +1,64 @@
 #!/bin/sh
 set -eu
-MESSAGE="Welcome to AeroOS 0.1.0-alpha
 
-AeroOS is a lightweight Debian-based desktop designed for older PCs.
+if [ "${1:-}" = "--autostart" ]; then
+  marker="${HOME}/.config/aeroos/welcome-shown"
+  if [ -e "$marker" ]; then
+    exit 0
+  fi
+  mkdir -p "$(dirname "$marker")"
+  : > "$marker"
+fi
 
-Included applications:
-• Firefox ESR — web browsing
-• Thunar — files and folders
-• Mousepad — text editing
-• Parole — media playback
-• Galculator — calculator
-• Synaptic — package manager
-• Xfce Settings — display, keyboard, power and desktop controls
+PERSISTENCE_STATUS="Not detected. Your changes may be lost after shutdown until full persistence is set up."
+PERSISTENCE_DEVICE="$(readlink -f /dev/disk/by-label/persistence 2>/dev/null || true)"
+if [ -n "$PERSISTENCE_DEVICE" ] && [ -b "$PERSISTENCE_DEVICE" ]; then
+  PERSISTENCE_FS="$(blkid -o value -s TYPE "$PERSISTENCE_DEVICE" 2>/dev/null || true)"
+  PERSISTENCE_MOUNT="$(findmnt -rn -S "$PERSISTENCE_DEVICE" -o TARGET 2>/dev/null | sed -n '1p' || true)"
+  if [ "$PERSISTENCE_FS" = "ext4" ] && [ -n "$PERSISTENCE_MOUNT" ] && \
+     [ -f "$PERSISTENCE_MOUNT/persistence.conf" ] && \
+     grep -Fxq '/ union' "$PERSISTENCE_MOUNT/persistence.conf"; then
+    PERSISTENCE_STATUS="Full persistence is active. Files, settings, installed applications and system changes should survive normal restarts."
+  elif [ -n "$PERSISTENCE_MOUNT" ]; then
+    PERSISTENCE_STATUS="A persistence volume was found, but it is not configured for full-root persistence. Check persistence.conf."
+  else
+    PERSISTENCE_STATUS="A volume labelled persistence exists, but it was not mounted by live-boot. Check its filesystem and persistence.conf."
+  fi
+fi
+
+MESSAGE="Welcome to AeroOS 0.2.0-alpha
+
+AeroOS is a lightweight Debian-based desktop for older 64-bit PCs.
+
+Your desktop includes:
+• File Explorer, Firefox ESR and Settings
+• App Store (Synaptic), Calculator and Text Editor
+• Media Player, System Monitor and Terminal
+• Aero Start menu, centered taskbar, volume and clock controls
+
+Persistence status:
+$PERSISTENCE_STATUS
+
+To set up maximum persistence on this USB:
+1. Restart and boot the AeroOS USB again.
+2. At the boot menu, highlight the normal AeroOS entry and press TAB.
+3. Add the word toram to the end of the boot line, then press Enter.
+4. After the desktop appears, open Set Up Persistence and confirm the AeroOS USB it identifies.
+5. When it finishes, restart normally without adding toram.
+
+The one-time toram boot copies the live system into RAM so the USB can be changed safely. It uses extra memory and may take longer. Do not use toram for everyday boots.
 
 Your account:
-The temporary Live account is 'aero'. Debian Live's default temporary password is 'live'. Open Terminal and run 'passwd' after startup to set a private password before using AeroOS for sensitive work.
-
-Persistence:
-Full persistence requires an ext4 USB volume labelled 'persistence' containing persistence.conf with this line:
-/ union
+The temporary Live user is 'aero'. The default password is 'live'. Open Terminal and run 'passwd' to set a private password before using AeroOS for sensitive work.
 
 Hardware:
-This first version targets 64-bit PCs and traditional Legacy BIOS. Wi-Fi, graphics acceleration, suspend and special function keys must be checked on the actual laptop.
+This alpha targets 64-bit PCs and traditional Legacy BIOS. Wi-Fi, graphics acceleration, suspend/resume and special function keys still need to be tested on the actual laptop.
 
 Safety:
-This is an experimental Live USB. It does not install itself to your internal drive. Do not run an installer or partitioning tool unless you know exactly which disk is selected."
+AeroOS is a USB-only Live system. It does not install to your internal drive. The persistence utility only operates on the AeroOS-labelled removable USB when it is 8–32 GiB and all its partitions are unmounted. If it refuses to continue, stop and share its message rather than choosing another disk manually."
 
 if command -v zenity >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
-  zenity --info --title="Welcome to AeroOS" --window-icon="aeroos" --width=560 --height=460 --text="$MESSAGE"
+  zenity --info --title="Welcome to AeroOS" --window-icon="aeroos" --width=620 --height=600 --text="$MESSAGE"
 else
   printf '%s\n' "$MESSAGE"
 fi
