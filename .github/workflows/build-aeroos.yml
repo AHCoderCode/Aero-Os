@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: aeroos-iso-${{ github.ref }}
@@ -67,3 +67,19 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
+
+      - name: Publish ISO as a direct release download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="aeroos-build-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" \
+            live-image-amd64.hybrid.iso \
+            live-image-amd64.hybrid.iso.sha256 \
+            iso-boot-report.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "AeroOS USB Live Build ${GITHUB_RUN_NUMBER}" \
+            --notes "Debian Trixie-based AeroOS USB Live image. Download the .iso asset directly; do not download the Actions artifact ZIP. Verify it with the accompanying SHA-256 file before writing it to USB." \
+            --prerelease
