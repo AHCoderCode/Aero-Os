@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
@@ -13,6 +14,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  publish_recovery:
+    name: Republish the already verified ISO for direct download
+    if: github.run_number == 19
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download the successful Build 17 ISO artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh run download 43205000199 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name AeroOS-ISO \
+            --dir recovered
+
+      - name: Verify the recovered ISO before publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s recovered/live-image-amd64.hybrid.iso
+          test -s recovered/live-image-amd64.hybrid.iso.sha256
+          test -s recovered/iso-boot-report.txt
+          cd recovered
+          sha256sum --check live-image-amd64.hybrid.iso.sha256
+          grep -qi "BIOS" iso-boot-report.txt
+
+      - name: Publish the verified ISO as a direct release download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="aeroos-recovery-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" \
+            recovered/live-image-amd64.hybrid.iso \
+            recovered/live-image-amd64.hybrid.iso.sha256 \
+            recovered/iso-boot-report.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "AeroOS USB Live — direct download" \
+            --notes "This is the already verified AeroOS image from successful Build 17. The operating-system source is unchanged; this release republishes the ISO as a direct file download instead of an Actions ZIP. Verify the SHA-256 file before writing the ISO to USB." \
+            --prerelease
+
   build:
     name: Build Debian Live hybrid ISO
     runs-on: ubuntu-24.04
