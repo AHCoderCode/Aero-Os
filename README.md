@@ -1,6 +1,6 @@
 # AeroOS
 
-**AeroOS 0.3.0-rc1** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
+**AeroOS 0.3.1-rc1** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
 
 It is a bootable operating-system image, not a website or desktop mock-up. It runs from a USB drive and does not install to or repartition the laptop's internal Windows drive.
 
@@ -15,7 +15,9 @@ Until the HP is tested, this remains a release candidate rather than a finished,
 
 ## Desktop and included apps
 
-The desktop uses Xfce and LightDM, customized with AeroOS wallpaper, dark blue styling, a centered Docklike taskbar, an Aero Start menu, system tray, volume control and clock. Compositing and GTK animations are disabled by default to reduce overhead on the older graphics hardware.
+The desktop uses Xfce and LightDM with an AeroOS translucent taskbar. The Start button is at the left, pinned and running app icons are centred in a Docklike group, and the system tray, volume and clock are at the right. The Start menu provides favorites, recent applications, categories and search.
+
+Xfwm compositing is enabled for actual panel transparency. GTK animations and Docklike previews remain disabled to limit overhead on the older graphics hardware. A solid-taskbar profile is available if the graphics adapter struggles.
 
 Included applications and tools:
 
@@ -40,13 +42,15 @@ The Control Center provides six light/dark theme and accent presets, wallpaper a
 - Firmware: Legacy BIOS / Syslinux hybrid media.
 - Memory: zram uses a conservative 25% RAM cap with zstd compression.
 - Graphics: Intel and legacy Radeon X.Org drivers plus Debian firmware packages.
-- Performance defaults: compositing disabled, GTK animations disabled, dock previews disabled.
+- Performance defaults: lightweight compositing enabled for transparency, GTK animations disabled, dock previews disabled.
 
 The exact Radeon PCI ID and Wi-Fi adapter are not yet confirmed. See [docs/HARDWARE-TARGET.md](docs/HARDWARE-TARGET.md).
 
 ## Customize AeroOS
 
-Open **AeroOS Control Center** from the desktop Settings shortcut or Aero Start menu. Choose a theme/accent preset, change wallpaper and desktop icons, reposition the taskbar, configure display/keyboard/power options, and select a performance profile. See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md).
+Open **AeroOS Control Center** from the desktop Settings shortcut or Start menu. The taskbar has a Start button at the left, app icons in the centre, and indicators at the right. Click Start or press the Windows/Super key for favorites, recent apps, categories and search. Right-click an app in Start and choose **Add to Favorites** to pin it.
+
+The existing desktop wallpaper is unchanged by this taskbar update. See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for appearance, taskbar and menu settings.
 
 ## Build the ISO
 

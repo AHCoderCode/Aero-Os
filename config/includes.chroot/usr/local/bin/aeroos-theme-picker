@@ -13,34 +13,42 @@ case "$choice" in
   "Aero Dark - Blue")
     bg="#0b1220"; surface="#151f30"; surface_hi="#202d43"; border="#34445e"
     text="#eaf0fb"; accent="#8b9cff"; accent_hi="#a8b5ff"
-    gtk_theme="Adwaita-dark"; icon_theme="Papirus-Dark"; panel="rgba(11,18,32,0.96)"
+    gtk_theme="Adwaita-dark"; icon_theme="Papirus-Dark"
+    panel="rgba(11,18,32,0.28)"; menu="rgba(16,25,42,0.94)"
     ;;
   "Aero Dark - Violet")
     bg="#100d20"; surface="#211936"; surface_hi="#30254a"; border="#4c3c68"
     text="#f0eaff"; accent="#aa87ff"; accent_hi="#c6adff"
-    gtk_theme="Adwaita-dark"; icon_theme="Papirus-Dark"; panel="rgba(16,13,32,0.96)"
+    gtk_theme="Adwaita-dark"; icon_theme="Papirus-Dark"
+    panel="rgba(16,13,32,0.28)"; menu="rgba(33,25,54,0.94)"
     ;;
   "Aero Dark - Teal")
     bg="#091b20"; surface="#122b31"; surface_hi="#1d3c43"; border="#31545b"
     text="#e7f7f6"; accent="#39c6be"; accent_hi="#80e2d9"
-    gtk_theme="Adwaita-dark"; icon_theme="Papirus-Dark"; panel="rgba(9,27,32,0.96)"
+    gtk_theme="Adwaita-dark"; icon_theme="Papirus-Dark"
+    panel="rgba(9,27,32,0.28)"; menu="rgba(18,43,49,0.94)"
     ;;
   "Aero Light - Blue")
     bg="#edf2fb"; surface="#ffffff"; surface_hi="#e1e9f6"; border="#c4d1e6"
     text="#17253b"; accent="#536ee8"; accent_hi="#344ac0"
-    gtk_theme="Adwaita"; icon_theme="Papirus-Light"; panel="rgba(237,242,251,0.97)"
+    gtk_theme="Adwaita"; icon_theme="Papirus-Light"
+    panel="rgba(237,242,251,0.32)"; menu="rgba(255,255,255,0.94)"
     ;;
   "Aero Light - Violet")
     bg="#f3effb"; surface="#ffffff"; surface_hi="#eae2f7"; border="#d2c4e9"
     text="#281d3b"; accent="#7954c7"; accent_hi="#5e3eaa"
-    gtk_theme="Adwaita"; icon_theme="Papirus-Light"; panel="rgba(243,239,251,0.97)"
+    gtk_theme="Adwaita"; icon_theme="Papirus-Light"
+    panel="rgba(243,239,251,0.32)"; menu="rgba(255,255,255,0.94)"
     ;;
   "Aero Light - Teal")
     bg="#eaf5f4"; surface="#ffffff"; surface_hi="#dcefed"; border="#bddbd7"
     text="#173331"; accent="#087f79"; accent_hi="#06645f"
-    gtk_theme="Adwaita"; icon_theme="Papirus-Light"; panel="rgba(234,245,244,0.97)"
+    gtk_theme="Adwaita"; icon_theme="Papirus-Light"
+    panel="rgba(234,245,244,0.32)"; menu="rgba(255,255,255,0.94)"
     ;;
-  *) exit 0 ;;
+  *)
+    exit 0
+    ;;
 esac
 
 config_dir="$HOME/.config/gtk-3.0"
@@ -81,10 +89,31 @@ tooltip {
 #XfcePanelWindow {
   background-color: $panel; color: @aero_text;
   border-top: 1px solid $accent;
+  box-shadow: none;
 }
 #whiskermenu-window {
-  background-color: @aero_surface; color: @aero_text;
-  border: 1px solid @aero_border; border-radius: 12px;
+  background-color: $menu; color: @aero_text;
+  border: 1px solid @aero_border; border-radius: 18px;
+  padding: 10px;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.28);
+}
+#whiskermenu-window entry {
+  background-color: @aero_surface;
+  border: 1px solid @aero_border;
+  border-radius: 12px;
+  min-height: 38px;
+  padding: 6px 12px;
+}
+#whiskermenu-window .view {
+  background-color: transparent;
+  color: @aero_text;
+  border-radius: 10px;
+}
+#whiskermenu-window .view:hover { background-color: @aero_surface_hi; }
+#whiskermenu-window .view:selected,
+#whiskermenu-window .view:selected:focus {
+  background-color: @aero_accent;
+  color: #ffffff;
 }
 #docklike-plugin button {
   min-height: 42px; min-width: 42px; border-radius: 10px;
@@ -111,4 +140,4 @@ xfdesktop --reload
 
 zenity --info --title="$APP_TITLE" --width=460 --text="Applied: $choice
 
-Your choice is saved in your AeroOS user profile. Already-open applications may need to be closed and reopened to pick up the new GTK style."
+Your choice is saved in your AeroOS user profile. The translucent taskbar is preserved. Already-open applications may need to be reopened to pick up the new GTK style."

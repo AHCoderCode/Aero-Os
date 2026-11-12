@@ -26,7 +26,7 @@ if [ -n "$PERSISTENCE_DEVICE" ] && [ -b "$PERSISTENCE_DEVICE" ]; then
   fi
 fi
 
-MESSAGE="Welcome to AeroOS 0.3.0-rc1
+MESSAGE="Welcome to AeroOS 0.3.1-rc1
 
 AeroOS is a lightweight Debian-based desktop for older 64-bit PCs.
 
@@ -34,11 +34,15 @@ Your desktop includes:
 • File Explorer, Firefox ESR and Settings
 • App Store (Synaptic), Calculator and Text Editor
 • Media Player, System Monitor and Terminal
-• Aero Start menu, centered taskbar, volume and clock controls
-• AeroOS Control Center for themes, accent colors, wallpaper, taskbar and performance
+• Transparent taskbar with Start on the left, apps centred and tray on the right
+• Start menu with favorites, recent apps, categories and search
+• AeroOS Control Center for themes, taskbar, display and performance
+
+Using Start:
+Click the Start icon at the left of the taskbar or press the Windows/Super key. Right-click an application in Start and choose Add to Favorites to pin it.
 
 Customization:
-Open Settings on the desktop or AeroOS Control Center from the Aero menu to change appearance, wallpaper, taskbar, display, keyboard and performance settings.
+Open AeroOS Control Center to change appearance, taskbar, display, keyboard and performance. The existing desktop wallpaper is unchanged.
 
 Persistence status:
 $PERSISTENCE_STATUS

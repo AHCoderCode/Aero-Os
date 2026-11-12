@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="paneA" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#9ec7ff"/>
+      <stop offset="1" stop-color="#6f8fff"/>
+    </linearGradient>
+    <linearGradient id="paneB" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#b2a0ff"/>
+      <stop offset="1" stop-color="#8877f0"/>
+    </linearGradient>
+  </defs>
+  <path d="M14 24 Q14 16 22 16 H58 V58 H14 Z" fill="url(#paneA)"/>
+  <path d="M70 16 H106 Q114 16 114 24 V58 H70 Z" fill="url(#paneB)"/>
+  <path d="M14 70 H58 V112 H22 Q14 112 14 104 Z" fill="url(#paneB)"/>
+  <path d="M70 70 H114 V104 Q114 112 106 112 H70 Z" fill="url(#paneA)"/>
+</svg>

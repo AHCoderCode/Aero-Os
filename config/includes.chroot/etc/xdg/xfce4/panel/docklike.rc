@@ -1,9 +1,10 @@
 [user]
-# Disable window previews to keep memory overhead low on the reference laptop.
+# Keep the centered dock lightweight on the HP's older Intel/Radeon graphics.
 showPreviews=false
 forceIconSize=true
 iconSize=38
 showWindowCount=false
 disableLauncherCounts=true
 indicatorColorFromTheme=true
-pinned=firefox-esr.desktop;thunar.desktop;xfce4-terminal.desktop;
+# Expanding panel separators on each side keep this group centred.
+pinned=firefox-esr.desktop;thunar.desktop;xfce4-terminal.desktop;galculator.desktop;org.xfce.mousepad.desktop;org.xfce.Parole.desktop;synaptic.desktop;aeroos-control-center.desktop;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Structural checks for the AeroOS image configuration."""
+"""Structural and release checks for the AeroOS image configuration."""
 from pathlib import Path
 import re
 import sys
@@ -12,6 +12,12 @@ ERRORS = []
 def require(condition: bool, message: str) -> None:
     if not condition:
         ERRORS.append(message)
+
+
+def read(path: str) -> str:
+    file = ROOT / path
+    require(file.is_file(), f"Required file missing: {path}")
+    return file.read_text(encoding="utf-8") if file.is_file() else ""
 
 
 # Parse every XML file and report the precise file that is malformed.
@@ -36,6 +42,13 @@ try:
     ]
     require(ids == [1, 2, 3, 4, 5, 6, 7],
             "The panel must list plugin IDs 1 through 7 in taskbar order.")
+    size = panel.find("./property[@name='size']") if panel is not None else None
+    alpha = panel.find("./property[@name='background-alpha']") if panel is not None else None
+    require(size is not None and size.get("value") == "54",
+            "The Aero taskbar must use a 54 px panel size.")
+    require(alpha is not None and alpha.get("value") == "28",
+            "The Aero taskbar must use the translucent 28% panel background.")
+
     plugins_root = channel.find("./property[@name='plugins']")
     plugin_nodes = {} if plugins_root is None else {
         p.get("name"): p for p in plugins_root.findall("./property")
@@ -54,30 +67,56 @@ try:
                 f"{key} must be the {value} panel plugin.")
     require(len(plugin_nodes) == len(expected),
             "Panel plugin entries must be unique and match the ID list.")
+
+    # The expanding spacers on both sides keep the app dock centred.
+    for spacer_id in ("plugin-2", "plugin-4"):
+        spacer = plugin_nodes.get(spacer_id)
+        expand = spacer.find("./property[@name='expand']") if spacer is not None else None
+        require(expand is not None and expand.get("value") == "true",
+                f"{spacer_id} must expand to centre the app dock.")
+
+    start_plugin = plugin_nodes.get("plugin-1")
+    require(start_plugin is not None, "The Start button is missing.")
+    if start_plugin is not None:
+        start_values = {p.get("name"): p.get("value") for p in start_plugin.findall("./property")}
+        require(start_values.get("button-title") == "Start",
+                "The left taskbar button must be named Start.")
+        require(start_values.get("button-icon") == "aeroos-start",
+                "The Start button must use the custom Aero four-pane icon.")
+        require(start_values.get("show-button-title") == "false",
+                "The Start button must be icon-only.")
 except (ET.ParseError, OSError) as exc:
     ERRORS.append(f"Cannot validate panel configuration: {exc}")
 
-packages = (ROOT / "config/package-lists/aeroos.list.chroot").read_text(encoding="utf-8")
-for package in ("xfce4", "xfce4-whiskermenu-plugin", "xfce4-docklike-plugin",
-                "network-manager", "firmware-amd-graphics", "firefox-esr",
-                "parted", "e2fsprogs", "zenity", "synaptic", "galculator",
-                "mousepad", "parole", "xfce4-taskmanager"):
+packages = read("config/package-lists/aeroos.list.chroot")
+required_packages = (
+    "xfce4", "xfce4-whiskermenu-plugin", "xfce4-docklike-plugin",
+    "network-manager", "firmware-amd-graphics", "firefox-esr",
+    "parted", "e2fsprogs", "zenity", "synaptic", "galculator",
+    "mousepad", "parole", "xfce4-taskmanager"
+)
+for package in required_packages:
     require(re.search(rf"(?m)^{re.escape(package)}$", packages) is not None,
             f"Required package missing: {package}")
 require(re.search(r"(?m)^gparted$", packages) is None,
-        "Do not include a general-purpose partition editor in the live image.")
+        "Do not include a general-purpose partition editor in the initial live image.")
 
-dock_file = ROOT / "config/includes.chroot/etc/xdg/xfce4/panel/docklike.rc"
-dock_text = dock_file.read_text(encoding="utf-8")
-for value in ("showPreviews=false", "firefox-esr.desktop", "thunar.desktop", "xfce4-terminal.desktop"):
-    require(value in dock_text, f"Docklike defaults must include {value}")
+dock_text = read("config/includes.chroot/etc/xdg/xfce4/panel/docklike.rc")
+dock_pins = (
+    "firefox-esr.desktop", "thunar.desktop", "xfce4-terminal.desktop",
+    "galculator.desktop", "org.xfce.mousepad.desktop",
+    "org.xfce.Parole.desktop", "synaptic.desktop", "aeroos-control-center.desktop"
+)
+for desktop_id in dock_pins:
+    require(desktop_id in dock_text, f"Centred app dock pin missing: {desktop_id}")
+for value in ("showPreviews=false", "forceIconSize=true", "iconSize=38"):
+    require(value in dock_text, f"Docklike must include {value}")
 
-auto = (ROOT / "auto/config").read_text(encoding="utf-8")
+auto = read("auto/config")
 require("--distribution trixie" in auto and "--architectures amd64" in auto,
         "The image must target Debian Trixie amd64.")
 require("persistence" in auto, "The Live image must enable persistence boot discovery.")
 
-# Verify that desktop shortcuts point to applications or AeroOS tools in the image.
 desktop_dir = ROOT / "config/includes.chroot/etc/skel/Desktop"
 launchers = {
     "File-Manager.desktop": ("Exec=thunar", "thunar"),
@@ -101,48 +140,85 @@ for filename, (exec_line, package) in launchers.items():
     require(re.search(rf"(?m)^{re.escape(package)}$", packages) is not None,
             f"{filename} requires missing package {package}.")
 
-autostart = ROOT / "config/includes.chroot/etc/xdg/autostart/aeroos-welcome.desktop"
-require(autostart.is_file(), "AeroOS first-start welcome autostart is missing.")
-if autostart.is_file():
-    auto_text = autostart.read_text(encoding="utf-8")
-    require("Exec=aeroos-welcome --autostart" in auto_text,
-            "Welcome autostart must use the one-time mode.")
+autostart = read("config/includes.chroot/etc/xdg/autostart/aeroos-welcome.desktop")
+require("Exec=aeroos-welcome --autostart" in autostart,
+        "Welcome autostart must use the one-time mode.")
 
-welcome = (ROOT / "config/includes.chroot/usr/local/bin/aeroos-welcome").read_text(encoding="utf-8")
-require("welcome-shown" in welcome, "Welcome autostart must remember dismissal when persistence is enabled.")
-require("AeroOS Control Center" in welcome, "Welcome guide must explain the customization app.")
+welcome_text = read("config/includes.chroot/usr/local/bin/aeroos-welcome")
+require("welcome-shown" in welcome_text,
+        "Welcome autostart must remember dismissal when persistence is enabled.")
+require("0.3.1-rc1" in welcome_text and "Windows/Super key" in welcome_text,
+        "Welcome guide must describe the new Start menu and current version.")
 
-parser_path = ROOT / "config/includes.chroot/usr/local/lib/aeroos/persistence-free-space.awk"
-require(parser_path.is_file(), "The persistence free-space parser is missing.")
-if parser_path.is_file():
-    require("free_end + 0 > free_start + 0" in parser_path.read_text(encoding="utf-8"),
-            "Persistence parser must compare byte offsets numerically.")
+parser = read("config/includes.chroot/usr/local/lib/aeroos/persistence-free-space.awk")
+require("free_end + 0 > free_start + 0" in parser,
+        "Persistence parser must compare byte offsets numerically.")
 
-persistence_script = ROOT / "config/includes.chroot/usr/local/sbin/aeroos-setup-persistence"
-require(persistence_script.is_file(), "The guarded persistence setup utility is missing.")
-if persistence_script.is_file():
-    setup_text = persistence_script.read_text(encoding="utf-8")
-    for guard in ("toram", "AEROOS_LIVE", "blockdev --getsize64", "RM", "parted", "mkfs.ext4", "/ union"):
-        require(guard in setup_text, f"Persistence setup is missing safety/configuration check: {guard}")
+persistence_script = read("config/includes.chroot/usr/local/sbin/aeroos-setup-persistence")
+for guard in ("toram", "AEROOS_LIVE", "blockdev --getsize64", "RM", "parted", "mkfs.ext4", "/ union"):
+    require(guard in persistence_script, f"Persistence setup is missing safety/configuration check: {guard}")
 
-# Verify that the Control Center and its tools contain the expected user options.
-control_center = ROOT / "config/includes.chroot/usr/local/bin/aeroos-control-center"
-theme_picker = ROOT / "config/includes.chroot/usr/local/bin/aeroos-theme-picker"
-performance_tool = ROOT / "config/includes.chroot/usr/local/bin/aeroos-performance"
-for path in (control_center, theme_picker, performance_tool):
-    require(path.is_file(), f"Missing AeroOS customization tool: {path.relative_to(ROOT)}")
-if control_center.is_file():
-    control_text = control_center.read_text(encoding="utf-8")
-    for option in ("Theme and accent color", "Wallpaper and desktop icons",
-                   "Taskbar and Start menu", "Display and screen resolution",
-                   "Keyboard and shortcuts", "Power and battery",
-                   "Performance profile", "All system settings"):
-        require(option in control_text, f"Control Center option missing: {option}")
-if theme_picker.is_file():
-    theme_text = theme_picker.read_text(encoding="utf-8")
-    for preset in ("Aero Dark - Blue", "Aero Dark - Violet", "Aero Dark - Teal",
-                   "Aero Light - Blue", "Aero Light - Violet", "Aero Light - Teal"):
-        require(preset in theme_text, f"Appearance preset missing: {preset}")
+control_center = read("config/includes.chroot/usr/local/bin/aeroos-control-center")
+for option in ("Theme and accent color", "Wallpaper and desktop icons",
+               "Taskbar and Start menu", "Display and screen resolution",
+               "Keyboard and shortcuts", "Power and battery",
+               "Performance profile", "All system settings"):
+    require(option in control_center, f"Control Center option missing: {option}")
+
+theme_tool = read("config/includes.chroot/usr/local/bin/aeroos-theme-picker")
+for preset in ("Aero Dark - Blue", "Aero Dark - Violet", "Aero Dark - Teal",
+               "Aero Light - Blue", "Aero Light - Violet", "Aero Light - Teal"):
+    require(preset in theme_tool, f"Appearance preset missing: {preset}")
+for value in ("rgba(11,18,32,0.28)", "rgba(16,13,32,0.28)", "rgba(9,27,32,0.28)",
+              "rgba(237,242,251,0.32)", "rgba(243,239,251,0.32)", "rgba(234,245,244,0.32)"):
+    require(value in theme_tool, f"Theme preset must preserve taskbar transparency: {value}")
+
+performance_tool = read("config.includes.chroot/usr/local/bin/aeroos-performance") if False else read("config/includes.chroot/usr/local/bin/aeroos-performance")
+require("Transparent taskbar (recommended)" in performance_tool and
+        "Solid taskbar (maximum battery/compatibility)" in performance_tool,
+        "Performance tool must offer transparent and solid taskbar modes.")
+require("compositing=true" in performance_tool and "compositing=false" in performance_tool,
+        "Both taskbar rendering modes must set the compositor explicitly.")
+
+xfwm = ET.parse(ROOT / "config/includes.chroot/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml").getroot()
+composite = xfwm.find("./property[@name='general']/property[@name='use_compositing']")
+require(composite is not None and composite.get("value") == "true",
+        "Xfwm compositing must be enabled for true taskbar transparency.")
+
+css = read("config/includes.chroot/etc/skel/.config/gtk-3.0/gtk.css")
+require("rgba(11, 18, 32, 0.28)" in css,
+        "The default panel CSS must use a translucent background.")
+require("#whiskermenu-window" in css and "border-radius: 18px" in css,
+        "The Aero Start menu must have rounded transparent styling.")
+
+menu_text = read("config/includes.chroot/etc/skel/.config/xfce4/panel/whiskermenu-1.rc")
+menu_settings = dict(
+    line.split("=", 1) for line in menu_text.splitlines()
+    if "=" in line and not line.lstrip().startswith("#")
+)
+for key, expected_value in {
+    "button-title": "Start",
+    "button-icon": "aeroos-start",
+    "show-button-title": "false",
+    "display-recent-default": "false",
+    "recent-items-max": "8",
+    "menu-width": "620",
+    "menu-height": "600",
+    "menu-opacity": "94",
+}.items():
+    require(menu_settings.get(key) == expected_value,
+            f"Start menu setting {key} must be {expected_value}.")
+for desktop_id in dock_pins:
+    require(desktop_id in menu_settings.get("favorites", "").split(","),
+            f"Start menu favorite missing: {desktop_id}")
+
+start_icon_path = ROOT / "config/includes.chroot/usr/share/icons/hicolor/scalable/apps/aeroos-start.svg"
+require(start_icon_path.is_file(), "Custom Aero Start icon is missing.")
+if start_icon_path.is_file():
+    try:
+        ET.parse(start_icon_path)
+    except ET.ParseError as exc:
+        ERRORS.append(f"Invalid Start icon SVG: {exc}")
 
 if ERRORS:
     print("AeroOS configuration validation failed:", file=sys.stderr)

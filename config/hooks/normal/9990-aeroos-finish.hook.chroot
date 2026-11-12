@@ -8,7 +8,7 @@ ln -sf /lib/systemd/system/lightdm.service /etc/systemd/system/display-manager.s
 # Keep Debian's /etc/os-release intact and expose AeroOS identity separately.
 cat > /etc/aeroos-release <<'EOF'
 NAME="AeroOS"
-VERSION="0.3.0-rc1"
+VERSION="0.3.1-rc1"
 BASE="Debian GNU/Linux 13 (trixie)"
 ARCHITECTURE="amd64"
 TARGET="HP ProBook 4520s class hardware"
@@ -22,6 +22,11 @@ chmod 0755 /usr/local/bin/aeroos-control-center
 chmod 0755 /usr/local/bin/aeroos-theme-picker
 chmod 0755 /usr/local/bin/aeroos-performance
 chmod 0755 /usr/local/sbin/aeroos-setup-persistence
+
+# Refresh the icon cache so the custom Start button is available immediately.
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache -f /usr/share/icons/hicolor || true
+fi
 
 # Trim package cache from the compressed read-only image.
 rm -rf /var/lib/apt/lists/*

@@ -6,17 +6,33 @@ if [ -z "${DISPLAY:-}" ] || ! command -v zenity >/dev/null 2>&1; then
   exit 1
 fi
 
-choice="$(zenity --list --radiolist --title="AeroOS Performance" --text="Choose how the desktop should balance effects and responsiveness on your laptop." --column="Use" --column="Profile" --print-column=2 --width=560 --height=300 TRUE "Smooth and responsive (recommended)" FALSE "More visual effects (may be slower)")" || exit 0
+choice="$(zenity --list --radiolist --title="AeroOS Performance" --text="Choose the taskbar rendering mode for your laptop." --column="Use" --column="Profile" --print-column=2 --width=600 --height=320 TRUE "Transparent taskbar (recommended)" FALSE "Solid taskbar (maximum battery/compatibility)")" || exit 0
 
 case "$choice" in
-  "Smooth and responsive (recommended)") compositing=false; animations=false ;;
-  "More visual effects (may be slower)") compositing=true; animations=true ;;
-  *) exit 0 ;;
+  "Transparent taskbar (recommended)")
+    compositing=true
+    animations=false
+    ;;
+  "Solid taskbar (maximum battery/compatibility)")
+    compositing=false
+    animations=false
+    ;;
+  *)
+    exit 0
+    ;;
 esac
 
 xfconf-query -c xfwm4 -p /general/use_compositing -s "$compositing"
 xfconf-query -c xsettings -p /Gtk/EnableAnimations -s "$animations"
 
-zenity --info --title="AeroOS Performance" --width=480 --text="Applied: $choice
+if [ "$compositing" = "true" ]; then
+  result="The translucent taskbar is enabled. GTK animations remain disabled to keep the desktop light."
+else
+  result="The taskbar will use a solid background. Compositing is disabled to reduce graphics work and power use."
+fi
 
-The new profile is saved in your user settings. On the HP ProBook 4520s, the smooth profile is recommended. You can switch back here at any time."
+zenity --info --title="AeroOS Performance" --width=500 --text="Applied: $choice
+
+$result
+
+This setting is saved in your user profile. You can return here at any time."
