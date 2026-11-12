@@ -1,17 +1,17 @@
 # AeroOS
 
-**AeroOS 0.2.0-alpha** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
+**AeroOS 0.3.0-rc1** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
 
 It is a bootable operating-system image, not a website or desktop mock-up. It runs from a USB drive and does not install to or repartition the laptop's internal Windows drive.
 
 ## Build and verification status
 
 - Debian 13 Trixie amd64 Live ISO: built successfully by GitHub Actions.
-- Legacy BIOS hybrid ISO: produced by the current build configuration.
-- Source/configuration checks: run during every build.
+- Legacy BIOS hybrid ISO: produced by the build and checked with xorriso.
+- Source/configuration checks and persistence-parser tests: run during every build.
 - Actual HP ProBook hardware test: still required. Wi-Fi, audio, graphics acceleration, suspend/resume, brightness keys and USB boot behavior cannot be certified by CI alone.
 
-Until the HP is tested, this remains an experimental alpha rather than a finished, hardware-certified OS.
+Until the HP is tested, this remains a release candidate rather than a finished, hardware-certified OS.
 
 ## Desktop and included apps
 
@@ -22,7 +22,7 @@ Included applications and tools:
 - **File Explorer:** Thunar, removable-drive browsing and archive support.
 - **Web browser:** Firefox ESR.
 - **App Store / package manager:** Synaptic.
-- **Settings:** Xfce Settings Manager, display, keyboard, power and desktop controls.
+- **Settings:** AeroOS Control Center and Xfce Settings Manager.
 - **Terminal:** Xfce Terminal.
 - **Calculator:** Galculator.
 - **Text editor:** Mousepad.
@@ -31,7 +31,7 @@ Included applications and tools:
 - **Power menu:** Xfce session logout/shutdown controls.
 - **Networking and devices:** NetworkManager, Wi-Fi firmware families, Bluetooth utilities, audio controls and removable storage support.
 
-A one-time **Set Up Persistence** utility is included for creating the full-persistence area on the AeroOS USB.
+The Control Center provides six light/dark theme and accent presets, wallpaper and icon settings, taskbar configuration, display, keyboard, power and performance options. A one-time **Set Up Persistence** utility creates the full-persistence area on the AeroOS USB.
 
 ## Hardware profile
 
@@ -44,6 +44,10 @@ A one-time **Set Up Persistence** utility is included for creating the full-pers
 
 The exact Radeon PCI ID and Wi-Fi adapter are not yet confirmed. See [docs/HARDWARE-TARGET.md](docs/HARDWARE-TARGET.md).
 
+## Customize AeroOS
+
+Open **AeroOS Control Center** from the desktop Settings shortcut or Aero Start menu. Choose a theme/accent preset, change wallpaper and desktop icons, reposition the taskbar, configure display/keyboard/power options, and select a performance profile. See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md).
+
 ## Build the ISO
 
 GitHub Actions runs **Build AeroOS ISO** on pushes to `main` and on manual dispatch.
@@ -54,7 +58,7 @@ GitHub Actions runs **Build AeroOS ISO** on pushes to `main` and on manual dispa
 4. Verify the ISO using `live-image-amd64.hybrid.iso.sha256`.
 5. The ISO is `live-image-amd64.hybrid.iso`.
 
-The artifact also includes the build log and El Torito boot report. The workflow retains artifacts for 30 days.
+The artifact also includes the build log and El Torito boot report. Each workflow artifact is retained for 30 days.
 
 Build locally on Debian Trixie amd64 with root access:
 
@@ -75,11 +79,11 @@ AeroOS boots with Debian Live's `persistence` option. Full-root persistence uses
 / union
 ```
 
-The new setup utility can create that partition in the unused space at the end of the same USB. For safety, it requires a one-time `toram` boot so the USB is not in use while its partition table is changed. It will only proceed when it identifies the AeroOS-labeled removable drive, the capacity is between 8 and 32 GiB, and every partition on that drive is unmounted. It refuses ambiguous or unsupported layouts.
+The setup utility can create that partition in the unused space at the end of the same USB. For safety, it requires a one-time `toram` boot so the USB is not in use while its partition table is changed. It will only proceed when it identifies the AeroOS-labeled removable drive, the capacity is between 8 and 32 GiB, and every partition on that drive is unmounted. It refuses ambiguous or unsupported layouts.
 
 Full persistence saves the writable system overlay: personal files, settings, installed packages and system changes. The USB's capacity is finite; the persistence partition uses the available space left after the ISO.
 
-**Writing the ISO erases the USB.** Back up its contents first. Never select the laptop's internal disk in a disk tool. Windows normally cannot read the resulting ext4 persistence partition; do not format it when Windows prompts.
+**Writing the ISO erases the USB.** Back up its contents first. Never select the laptop's internal drive in a disk tool. Windows normally cannot read the resulting ext4 persistence partition; do not format it when Windows prompts.
 
 ## Default Live account
 
@@ -91,9 +95,9 @@ The temporary account is `aero`. Debian Live's default password is `live`; the d
 - `config/package-lists/` — desktop, firmware and utility packages
 - `config/includes.chroot/` — AeroOS theme, launchers and system defaults
 - `config/hooks/` — image finalization
-- `scripts/` — source/configuration validation
+- `scripts/` — source/configuration validation and tests
 - `.github/workflows/` — automated ISO builder
-- `docs/` — hardware and USB/persistence instructions
+- `docs/` — hardware, customization and USB/persistence instructions
 
 ## License
 

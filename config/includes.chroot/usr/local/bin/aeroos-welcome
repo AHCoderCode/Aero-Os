@@ -15,8 +15,8 @@ PERSISTENCE_DEVICE="$(readlink -f /dev/disk/by-label/persistence 2>/dev/null || 
 if [ -n "$PERSISTENCE_DEVICE" ] && [ -b "$PERSISTENCE_DEVICE" ]; then
   PERSISTENCE_FS="$(blkid -o value -s TYPE "$PERSISTENCE_DEVICE" 2>/dev/null || true)"
   PERSISTENCE_MOUNT="$(findmnt -rn -S "$PERSISTENCE_DEVICE" -o TARGET 2>/dev/null | sed -n '1p' || true)"
-  if [ "$PERSISTENCE_FS" = "ext4" ] && [ -n "$PERSISTENCE_MOUNT" ] && \
-     [ -f "$PERSISTENCE_MOUNT/persistence.conf" ] && \
+  if [ "$PERSISTENCE_FS" = "ext4" ] && [ -n "$PERSISTENCE_MOUNT" ] &&
+     [ -f "$PERSISTENCE_MOUNT/persistence.conf" ] &&
      grep -Fxq '/ union' "$PERSISTENCE_MOUNT/persistence.conf"; then
     PERSISTENCE_STATUS="Full persistence is active. Files, settings, installed applications and system changes should survive normal restarts."
   elif [ -n "$PERSISTENCE_MOUNT" ]; then
@@ -26,7 +26,7 @@ if [ -n "$PERSISTENCE_DEVICE" ] && [ -b "$PERSISTENCE_DEVICE" ]; then
   fi
 fi
 
-MESSAGE="Welcome to AeroOS 0.2.0-alpha
+MESSAGE="Welcome to AeroOS 0.3.0-rc1
 
 AeroOS is a lightweight Debian-based desktop for older 64-bit PCs.
 
@@ -35,6 +35,10 @@ Your desktop includes:
 • App Store (Synaptic), Calculator and Text Editor
 • Media Player, System Monitor and Terminal
 • Aero Start menu, centered taskbar, volume and clock controls
+• AeroOS Control Center for themes, accent colors, wallpaper, taskbar and performance
+
+Customization:
+Open Settings on the desktop or AeroOS Control Center from the Aero menu to change appearance, wallpaper, taskbar, display, keyboard and performance settings.
 
 Persistence status:
 $PERSISTENCE_STATUS
@@ -52,13 +56,13 @@ Your account:
 The temporary Live user is 'aero'. The default password is 'live'. Open Terminal and run 'passwd' to set a private password before using AeroOS for sensitive work.
 
 Hardware:
-This alpha targets 64-bit PCs and traditional Legacy BIOS. Wi-Fi, graphics acceleration, suspend/resume and special function keys still need to be tested on the actual laptop.
+This release candidate targets 64-bit PCs and traditional Legacy BIOS. Wi-Fi, graphics acceleration, suspend/resume and special function keys still need to be tested on the actual laptop.
 
 Safety:
 AeroOS is a USB-only Live system. It does not install to your internal drive. The persistence utility only operates on the AeroOS-labelled removable USB when it is 8–32 GiB and all its partitions are unmounted. If it refuses to continue, stop and share its message rather than choosing another disk manually."
 
 if command -v zenity >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
-  zenity --info --title="Welcome to AeroOS" --window-icon="aeroos" --width=620 --height=600 --text="$MESSAGE"
+  zenity --info --title="Welcome to AeroOS" --window-icon="aeroos" --width=640 --height=640 --text="$MESSAGE"
 else
   printf '%s\n' "$MESSAGE"
 fi

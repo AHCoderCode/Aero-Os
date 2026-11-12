@@ -77,11 +77,11 @@ require("--distribution trixie" in auto and "--architectures amd64" in auto,
         "The image must target Debian Trixie amd64.")
 require("persistence" in auto, "The Live image must enable persistence boot discovery.")
 
-# Verify the desktop shortcuts point to applications present in the image.
+# Verify that desktop shortcuts point to applications or AeroOS tools in the image.
 desktop_dir = ROOT / "config/includes.chroot/etc/skel/Desktop"
 launchers = {
     "File-Manager.desktop": ("Exec=thunar", "thunar"),
-    "Settings.desktop": ("Exec=xfce4-settings-manager", "xfce4"),
+    "Settings.desktop": ("Exec=aeroos-control-center", "xfce4"),
     "Web-Browser.desktop": ("Exec=firefox-esr %u", "firefox-esr"),
     "Welcome-to-AeroOS.desktop": ("Exec=aeroos-welcome", "zenity"),
     "App-Store.desktop": ("Exec=synaptic-pkexec", "synaptic"),
@@ -110,6 +110,7 @@ if autostart.is_file():
 
 welcome = (ROOT / "config/includes.chroot/usr/local/bin/aeroos-welcome").read_text(encoding="utf-8")
 require("welcome-shown" in welcome, "Welcome autostart must remember dismissal when persistence is enabled.")
+require("AeroOS Control Center" in welcome, "Welcome guide must explain the customization app.")
 
 parser_path = ROOT / "config/includes.chroot/usr/local/lib/aeroos/persistence-free-space.awk"
 require(parser_path.is_file(), "The persistence free-space parser is missing.")
@@ -123,6 +124,25 @@ if persistence_script.is_file():
     setup_text = persistence_script.read_text(encoding="utf-8")
     for guard in ("toram", "AEROOS_LIVE", "blockdev --getsize64", "RM", "parted", "mkfs.ext4", "/ union"):
         require(guard in setup_text, f"Persistence setup is missing safety/configuration check: {guard}")
+
+# Verify that the Control Center and its tools contain the expected user options.
+control_center = ROOT / "config/includes.chroot/usr/local/bin/aeroos-control-center"
+theme_picker = ROOT / "config/includes.chroot/usr/local/bin/aeroos-theme-picker"
+performance_tool = ROOT / "config/includes.chroot/usr/local/bin/aeroos-performance"
+for path in (control_center, theme_picker, performance_tool):
+    require(path.is_file(), f"Missing AeroOS customization tool: {path.relative_to(ROOT)}")
+if control_center.is_file():
+    control_text = control_center.read_text(encoding="utf-8")
+    for option in ("Theme and accent color", "Wallpaper and desktop icons",
+                   "Taskbar and Start menu", "Display and screen resolution",
+                   "Keyboard and shortcuts", "Power and battery",
+                   "Performance profile", "All system settings"):
+        require(option in control_text, f"Control Center option missing: {option}")
+if theme_picker.is_file():
+    theme_text = theme_picker.read_text(encoding="utf-8")
+    for preset in ("Aero Dark - Blue", "Aero Dark - Violet", "Aero Dark - Teal",
+                   "Aero Light - Blue", "Aero Light - Violet", "Aero Light - Teal"):
+        require(preset in theme_text, f"Appearance preset missing: {preset}")
 
 if ERRORS:
     print("AeroOS configuration validation failed:", file=sys.stderr)

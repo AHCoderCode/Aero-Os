@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=AeroOS Settings
-Comment=Configure your desktop and hardware
-Exec=xfce4-settings-manager
+Name=AeroOS Control Center
+Comment=Personalize AeroOS and configure your laptop
+Exec=aeroos-control-center
 Icon=preferences-system
 Terminal=false
 Categories=Settings;

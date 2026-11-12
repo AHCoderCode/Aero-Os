@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+if [ -z "${DISPLAY:-}" ] || ! command -v zenity >/dev/null 2>&1; then
+  printf '%s\n' "Open Performance Profile from AeroOS Control Center."
+  exit 1
+fi
+
+choice="$(zenity --list --radiolist --title="AeroOS Performance" --text="Choose how the desktop should balance effects and responsiveness on your laptop." --column="Use" --column="Profile" --print-column=2 --width=560 --height=300 TRUE "Smooth and responsive (recommended)" FALSE "More visual effects (may be slower)")" || exit 0
+
+case "$choice" in
+  "Smooth and responsive (recommended)") compositing=false; animations=false ;;
+  "More visual effects (may be slower)") compositing=true; animations=true ;;
+  *) exit 0 ;;
+esac
+
+xfconf-query -c xfwm4 -p /general/use_compositing -s "$compositing"
+xfconf-query -c xsettings -p /Gtk/EnableAnimations -s "$animations"
+
+zenity --info --title="AeroOS Performance" --width=480 --text="Applied: $choice
+
+The new profile is saved in your user settings. On the HP ProBook 4520s, the smooth profile is recommended. You can switch back here at any time."

@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+if [ -z "${DISPLAY:-}" ] || ! command -v zenity >/dev/null 2>&1; then
+  printf '%s\n' "Open AeroOS Control Center from the desktop session."
+  exit 1
+fi
+
+choice="$(zenity --list --title="AeroOS Control Center" --text="Personalize your desktop and configure your laptop." --column="Settings" --width=520 --height=420 "Theme and accent color" "Wallpaper and desktop icons" "Taskbar and Start menu" "Display and screen resolution" "Keyboard and shortcuts" "Power and battery" "Performance profile" "All system settings")" || exit 0
+
+case "$choice" in
+  "Theme and accent color") exec /usr/local/bin/aeroos-theme-picker ;;
+  "Wallpaper and desktop icons") exec xfdesktop-settings ;;
+  "Taskbar and Start menu") exec xfce4-panel --preferences=1 ;;
+  "Display and screen resolution") exec xfce4-display-settings ;;
+  "Keyboard and shortcuts") exec xfce4-keyboard-settings ;;
+  "Power and battery") exec xfce4-power-manager-settings ;;
+  "Performance profile") exec /usr/local/bin/aeroos-performance ;;
+  "All system settings") exec xfce4-settings-manager ;;
+  *) exit 0 ;;
+esac
