@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AeroOS Terminal
+Comment=Open the terminal
+Exec=xfce4-terminal
+Icon=utilities-terminal
+Terminal=false
+Categories=System;

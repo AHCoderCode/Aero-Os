@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AeroOS File Explorer
+Comment=Browse files and USB drives
+Exec=thunar
+Icon=system-file-manager
+Terminal=false
+Categories=System;

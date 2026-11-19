@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AeroOS Media Player
+Comment=Play audio and video
+Exec=parole %U
+Icon=multimedia-player
+Terminal=false
+Categories=System;

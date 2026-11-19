@@ -7,4 +7,4 @@ showWindowCount=false
 disableLauncherCounts=true
 indicatorColorFromTheme=true
 # Expanding panel separators on each side keep this group centred.
-pinned=firefox-esr.desktop;thunar.desktop;xfce4-terminal.desktop;galculator.desktop;org.xfce.mousepad.desktop;org.xfce.Parole.desktop;synaptic.desktop;aeroos-control-center.desktop;
+pinned=aeroos-browser.desktop;aeroos-files.desktop;aeroos-terminal.desktop;aeroos-calculator.desktop;aeroos-editor.desktop;aeroos-media.desktop;aeroos-store.desktop;aeroos-settings.desktop;

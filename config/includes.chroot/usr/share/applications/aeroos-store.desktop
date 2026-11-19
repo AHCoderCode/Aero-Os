@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AeroOS App Store
+Comment=Install applications with Synaptic
+Exec=synaptic-pkexec
+Icon=system-software-install
+Terminal=false
+Categories=System;

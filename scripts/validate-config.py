@@ -103,9 +103,9 @@ require(re.search(r"(?m)^gparted$", packages) is None,
 
 dock_text = read("config/includes.chroot/etc/xdg/xfce4/panel/docklike.rc")
 dock_pins = (
-    "firefox-esr.desktop", "thunar.desktop", "xfce4-terminal.desktop",
-    "galculator.desktop", "org.xfce.mousepad.desktop",
-    "org.xfce.Parole.desktop", "synaptic.desktop", "aeroos-control-center.desktop"
+    "aeroos-browser.desktop", "aeroos-files.desktop", "aeroos-terminal.desktop",
+    "aeroos-calculator.desktop", "aeroos-editor.desktop", "aeroos-media.desktop",
+    "aeroos-store.desktop", "aeroos-settings.desktop"
 )
 for desktop_id in dock_pins:
     require(desktop_id in dock_text, f"Centred app dock pin missing: {desktop_id}")
@@ -149,6 +149,32 @@ require("welcome-shown" in welcome_text,
         "Welcome autostart must remember dismissal when persistence is enabled.")
 require("0.3.1-rc1" in welcome_text and "Windows/Super key" in welcome_text,
         "Welcome guide must describe the new Start menu and current version.")
+
+# Every pinned dock item is a real, explicitly installed AeroOS launcher.
+dock_launcher_execs = {
+    "aeroos-browser.desktop": "Exec=firefox-esr %u",
+    "aeroos-files.desktop": "Exec=thunar",
+    "aeroos-terminal.desktop": "Exec=xfce4-terminal",
+    "aeroos-calculator.desktop": "Exec=galculator",
+    "aeroos-editor.desktop": "Exec=mousepad %F",
+    "aeroos-media.desktop": "Exec=parole %U",
+    "aeroos-store.desktop": "Exec=synaptic-pkexec",
+    "aeroos-settings.desktop": "Exec=aeroos-control-center",
+}
+for desktop_id, exec_line in dock_launcher_execs.items():
+    launcher_path = ROOT / "config/includes.chroot/usr/share/applications" / desktop_id
+    require(launcher_path.is_file(), f"Dock launcher missing: {desktop_id}")
+    if launcher_path.is_file():
+        launcher_text = launcher_path.read_text(encoding="utf-8")
+        require(exec_line in launcher_text, f"{desktop_id} has an incorrect Exec command.")
+
+keyboard_shortcuts = read("config/includes.chroot/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml")
+require('name="default"' in keyboard_shortcuts and 'value="xfce4-popup-whiskermenu"' in keyboard_shortcuts,
+        "Start menu keyboard shortcuts must use Xfce's commands/default channel.")
+require('name="Super_L"' in keyboard_shortcuts and 'name="Super_R"' in keyboard_shortcuts,
+        "Both left and right Super keys must open the Start menu.")
+require('name="&lt;Primary&gt;Escape"' in keyboard_shortcuts,
+        "Ctrl+Escape must provide a fallback Start-menu shortcut.")
 
 parser = read("config/includes.chroot/usr/local/lib/aeroos/persistence-free-space.awk")
 require("free_end + 0 > free_start + 0" in parser,

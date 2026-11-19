@@ -15,9 +15,9 @@ Until the HP is tested, this remains a release candidate rather than a finished,
 
 ## Desktop and included apps
 
-The desktop uses Xfce and LightDM with an AeroOS translucent taskbar. The Start button is at the left, pinned and running app icons are centred in a Docklike group, and the system tray, volume and clock are at the right. The Start menu provides favorites, recent applications, categories and search.
+The desktop uses Xfce and LightDM with an AeroOS translucent taskbar. The Start button is at the left, pinned and running app icons are centred in a pinned application dock, and the system tray, volume and clock are at the right. The Start menu provides favorites, recent applications, categories and search.
 
-Xfwm compositing is enabled for actual panel transparency. GTK animations and Docklike previews remain disabled to limit overhead on the older graphics hardware. A solid-taskbar profile is available if the graphics adapter struggles.
+Xfwm compositing is enabled for actual panel transparency. GTK animations remain disabled to limit overhead on older graphics hardware. The dock uses explicit AeroOS launcher entries so each pinned application has its own correct icon. A solid-taskbar profile is available if the graphics adapter struggles.
 
 Included applications and tools:
 

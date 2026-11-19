@@ -1,5 +1,5 @@
 # AeroOS Start menu defaults (Whisker Menu plugin instance 1)
-favorites=firefox-esr.desktop,thunar.desktop,xfce4-terminal.desktop,galculator.desktop,org.xfce.mousepad.desktop,org.xfce.Parole.desktop,synaptic.desktop,aeroos-control-center.desktop
+favorites=aeroos-browser.desktop,aeroos-files.desktop,aeroos-terminal.desktop,aeroos-calculator.desktop,aeroos-editor.desktop,aeroos-media.desktop,aeroos-store.desktop,aeroos-settings.desktop
 button-title=Start
 button-icon=aeroos-start
 button-single-row=false

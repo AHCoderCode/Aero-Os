@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AeroOS Calculator
+Comment=Open the calculator
+Exec=galculator
+Icon=accessories-calculator
+Terminal=false
+Categories=System;

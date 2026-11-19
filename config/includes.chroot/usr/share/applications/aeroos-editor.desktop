@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AeroOS Text Editor
+Comment=Open the text editor
+Exec=mousepad %F
+Icon=accessories-text-editor
+Terminal=false
+Categories=System;
