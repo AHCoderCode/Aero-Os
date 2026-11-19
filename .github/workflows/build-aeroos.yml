@@ -81,11 +81,7 @@ jobs:
               chmod +x auto/config
               sh -n auto/config
               sh -n config/includes.chroot/usr/local/bin/aeroos-welcome
-              python3 - <<'PY'
-              import ast
-              from pathlib import Path
-              ast.parse(Path("config/includes.chroot/usr/local/bin/aeroos-control-center").read_text(encoding="utf-8"))
-              PY
+              python3 -c "import ast,pathlib; ast.parse(pathlib.Path(\"config/includes.chroot/usr/local/bin/aeroos-control-center\").read_text(encoding=\"utf-8\"))"
               bash -n config/includes.chroot/usr/local/bin/aeroos-theme-picker
               sh -n config/includes.chroot/usr/local/bin/aeroos-performance
               bash -n config/includes.chroot/usr/local/sbin/aeroos-setup-persistence
