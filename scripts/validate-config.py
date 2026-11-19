@@ -34,7 +34,7 @@ try:
         require(ex is not None and ex.get("value")=="true",f"Panel spacer {i} must expand.")
 except (ET.ParseError,OSError,ValueError) as e: ERRORS.append(f"Cannot validate panel: {e}")
 packages=read("config/package-lists/aeroos.list.chroot")
-for name in ("xfce4","xfce4-whiskermenu-plugin","xfce4-power-manager","xfce4-pulseaudio-plugin","network-manager","network-manager-gnome","blueman","firmware-amd-graphics","python3-gi","gir1.2-gtk-3.0","exo-utils","firefox-esr","thunar","synaptic","galculator","mousepad","parole","zenity","parted","e2fsprogs"):
+for name in ("xfce4","xfce4-whiskermenu-plugin","xfce4-power-manager","xfce4-power-manager-plugins","xfce4-pulseaudio-plugin","network-manager","network-manager-gnome","blueman","firmware-amd-graphics","python3-gi","gir1.2-gtk-3.0","exo-utils","firefox-esr","thunar","synaptic","galculator","mousepad","parole","zenity","parted","e2fsprogs"):
     require(re.search(rf"(?m)^{re.escape(name)}$",packages) is not None,f"Missing package {name}.")
 require(re.search(r"(?m)^xfce4-docklike-plugin$",packages) is None,"Third-party Docklike must not be required.")
 require(re.search(r"(?m)^gparted$",packages) is None,"Do not include a general partition editor.")
