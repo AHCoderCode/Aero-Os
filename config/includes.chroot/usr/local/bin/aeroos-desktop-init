@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+WALLPAPER="/usr/share/backgrounds/aeroos/aeroos-wallpaper.svg"
+command -v xfconf-query >/dev/null 2>&1 || exit 0
+xfconf-query -c xfce4-desktop -l 2>/dev/null | while IFS= read -r property; do
+  case "$property" in
+    */last-image) xfconf-query -c xfce4-desktop -p "$property" -s "$WALLPAPER" >/dev/null 2>&1 || true ;;
+  esac
+done
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image --create -t string -s "$WALLPAPER" >/dev/null 2>&1 || true
+xfdesktop --reload >/dev/null 2>&1 || true

@@ -1,6 +1,6 @@
 # AeroOS
 
-**AeroOS 0.3.1-rc1** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
+**AeroOS 0.4.0-rc1** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
 
 It is a bootable operating-system image, not a website or desktop mock-up. It runs from a USB drive and does not install to or repartition the laptop's internal Windows drive.
 
@@ -15,7 +15,7 @@ Until the HP is tested, this remains a release candidate rather than a finished,
 
 ## Desktop and included apps
 
-The desktop uses Xfce and LightDM with an AeroOS translucent taskbar. The Start button is at the left, pinned and running app icons are centred in a pinned application dock, and the system tray, volume and clock are at the right. The Start menu provides favorites, recent applications, categories and search.
+The desktop uses Xfce and LightDM with a native Xfce panel, application launchers, running-window buttons, system tray, battery/power, volume and clock. The Start button is at the left, pinned and running app icons are centred in a pinned application dock, and the system tray, volume and clock are at the right. The Start menu provides favorites, recent applications, categories and search.
 
 Xfwm compositing is enabled for actual panel transparency. GTK animations remain disabled to limit overhead on older graphics hardware. The dock uses explicit AeroOS launcher entries so each pinned application has its own correct icon. A solid-taskbar profile is available if the graphics adapter struggles.
 
@@ -24,7 +24,7 @@ Included applications and tools:
 - **File Explorer:** Thunar, removable-drive browsing and archive support.
 - **Web browser:** Firefox ESR.
 - **App Store / package manager:** Synaptic.
-- **Settings:** AeroOS Control Center and Xfce Settings Manager.
+- **Settings:** AeroOS Settings hub and Xfce Settings Manager. The hub opens the installed display, keyboard, mouse, power, notification, network, Bluetooth, audio and package-management tools.
 - **Terminal:** Xfce Terminal.
 - **Calculator:** Galculator.
 - **Text editor:** Mousepad.
@@ -48,7 +48,7 @@ The exact Radeon PCI ID and Wi-Fi adapter are not yet confirmed. See [docs/HARDW
 
 ## Customize AeroOS
 
-Open **AeroOS Control Center** from the desktop Settings shortcut or Start menu. The taskbar has a Start button at the left, app icons in the centre, and indicators at the right. Click Start or press the Windows/Super key for favorites, recent apps, categories and search. Right-click an app in Start and choose **Add to Favorites** to pin it.
+Open **AeroOS Settings** from the desktop Settings shortcut or Start menu. The taskbar has a Start button at the left, app icons in the centre, and indicators at the right. Click Start or press the Windows/Super key for favorites, recent apps, categories and search. Right-click an app in Start and choose **Add to Favorites** to pin it.
 
 The existing desktop wallpaper is unchanged by this taskbar update. See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for appearance, taskbar and menu settings.
 
@@ -106,3 +106,14 @@ The temporary account is `aero`. Debian Live's default password is `live`; the d
 ## License
 
 The repository's MIT license applies to original AeroOS project files. Debian packages and their artwork remain under their respective upstream licenses.
+
+
+## 0.4.0 release-candidate desktop changes
+
+- Replaced the Docklike dependency with native Xfce launcher, tasklist, tray, power-manager, PulseAudio and clock plugins.
+- Added explicit app launcher entries so pinned browser, file manager, terminal, calculator, editor, media player, app store and settings icons resolve to real applications.
+- Added a GTK 3 AeroOS Settings hub that opens the installed Xfce and device configuration tools.
+- Added Super-key, Ctrl+Esc, Super+E, Super+W, Super+T and Super+I shortcuts, plus window-management shortcuts.
+- Refreshed the desktop wallpaper and GTK theme.
+
+This release candidate still requires hands-on testing on the HP ProBook 4520s. A successful CI build verifies ISO generation, configuration structure and source checks; it does not certify Wi-Fi, graphics acceleration, audio, Bluetooth, suspend/resume or special keys on the target laptop.

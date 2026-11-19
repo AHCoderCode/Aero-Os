@@ -1,22 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <channel name="xfce4-keyboard-shortcuts" version="1.0">
-  <property name="commands" type="empty">
-    <property name="default" type="empty">
-      <!-- Open the Start menu with the Windows/Super key, either side. -->
-      <property name="Super_L" type="string" value="xfce4-popup-whiskermenu"/>
-      <property name="Super_R" type="string" value="xfce4-popup-whiskermenu"/>
-      <!-- Reliable fallback on keyboards where Super is intercepted. -->
-      <property name="&lt;Primary&gt;Escape" type="string" value="xfce4-popup-whiskermenu"/>
-      <property name="&lt;Primary&gt;&lt;Alt&gt;t" type="string" value="xfce4-terminal"/>
-      <property name="&lt;Primary&gt;&lt;Alt&gt;Escape" type="string" value="xfce4-taskmanager"/>
-      <property name="&lt;Alt&gt;F4" type="string" value="close_window_key"/>
-    </property>
+ <property name="commands" type="empty">
+  <property name="default" type="empty">
+   <property name="Super_L" type="string" value="xfce4-popup-whiskermenu"/>
+   <property name="Super_R" type="string" value="xfce4-popup-whiskermenu"/>
+   <property name="&lt;Primary&gt;Escape" type="string" value="xfce4-popup-whiskermenu"/>
+   <property name="&lt;Super&gt;e" type="string" value="thunar"/>
+   <property name="&lt;Super&gt;w" type="string" value="firefox-esr"/>
+   <property name="&lt;Super&gt;t" type="string" value="xfce4-terminal"/>
+   <property name="&lt;Super&gt;r" type="string" value="xfce4-appfinder"/>
+   <property name="&lt;Super&gt;i" type="string" value="aeroos-control-center"/>
+   <property name="&lt;Primary&gt;&lt;Alt&gt;t" type="string" value="xfce4-terminal"/>
+   <property name="&lt;Primary&gt;&lt;Shift&gt;Escape" type="string" value="xfce4-taskmanager"/>
+   <property name="&lt;Primary&gt;&lt;Alt&gt;Delete" type="string" value="xfce4-session-logout"/>
+   <property name="Print" type="string" value="xfce4-screenshooter -f"/>
+   <property name="&lt;Alt&gt;Print" type="string" value="xfce4-screenshooter -w"/>
+   <property name="&lt;Shift&gt;Print" type="string" value="xfce4-screenshooter -r"/>
+   <property name="XF86Display" type="string" value="xfce4-display-settings --minimal"/>
   </property>
-  <property name="xfwm4" type="empty">
-    <property name="default" type="empty">
-      <property name="&lt;Alt&gt;F4" type="string" value="close_window_key"/>
-      <property name="&lt;Alt&gt;F9" type="string" value="hide_window_key"/>
-      <property name="&lt;Alt&gt;F10" type="string" value="maximize_window_key"/>
-    </property>
+ </property>
+ <property name="xfwm4" type="empty">
+  <property name="default" type="empty">
+   <property name="&lt;Alt&gt;F4" type="string" value="close_window_key"/>
+   <property name="&lt;Alt&gt;F9" type="string" value="hide_window_key"/>
+   <property name="&lt;Alt&gt;F10" type="string" value="maximize_window_key"/>
+   <property name="&lt;Alt&gt;Tab" type="string" value="cycle_windows_key"/>
+   <property name="&lt;Super&gt;Tab" type="string" value="switch_window_key"/>
+   <property name="&lt;Super&gt;d" type="string" value="show_desktop_key"/>
   </property>
+ </property>
 </channel>

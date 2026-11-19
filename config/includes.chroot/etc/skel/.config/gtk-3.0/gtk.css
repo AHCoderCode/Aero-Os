@@ -1,89 +1,24 @@
-/* AeroOS translucent desktop and Windows-inspired Start menu. */
+/* AeroOS Aurora theme: restrained, high-contrast and lightweight. */
 @define-color aero_bg #0b1220;
-@define-color aero_surface #151f30;
-@define-color aero_surface_hi #202d43;
-@define-color aero_border #34445e;
+@define-color aero_surface #121e31;
+@define-color aero_surface_hi #1b2c47;
+@define-color aero_border #2c4264;
 @define-color aero_text #eaf0fb;
-@define-color aero_accent #8b9cff;
-@define-color aero_accent_hi #a8b5ff;
-
+@define-color aero_accent #8ba6ff;
+@define-color aero_accent_hi #b5c5ff;
 window, .background { background-color: @aero_bg; color: @aero_text; }
-headerbar, .titlebar {
-  background-image: linear-gradient(to bottom, #1b2940, #131e30);
-  color: @aero_text; border-color: @aero_border; box-shadow: none;
-}
-button {
-  background-image: none; background-color: @aero_surface_hi;
-  color: @aero_text; border: 1px solid @aero_border;
-  border-radius: 9px; padding: 6px 11px; box-shadow: none;
-}
-button:hover { background-color: #2b3b59; border-color: @aero_accent; }
-button:checked, button:active { background-color: #35456b; border-color: @aero_accent; }
-entry, spinbutton, combobox, textview, .view, treeview.view {
-  background-color: #0f1929; color: @aero_text;
-  border-color: @aero_border; border-radius: 7px; caret-color: @aero_accent_hi;
-}
-*:selected, .view:selected, .view:selected:focus { background-color: #33456f; color: #fff; }
+headerbar, .titlebar { background-image: linear-gradient(to bottom, #192942, #111d30); color: @aero_text; border-color: @aero_border; box-shadow: none; }
+button { background-image: none; background-color: @aero_surface_hi; color: @aero_text; border: 1px solid @aero_border; border-radius: 10px; padding: 7px 12px; box-shadow: none; }
+button:hover { background-color: #263d61; border-color: @aero_accent; }
+button:checked, button:active { background-color: #304b78; border-color: @aero_accent; }
+entry, spinbutton, combobox, textview, .view, treeview.view { background-color: #0f1929; color: @aero_text; border-color: @aero_border; border-radius: 8px; caret-color: @aero_accent_hi; }
+*:selected, .view:selected, .view:selected:focus { background-color: #344e7d; color: #fff; }
 menubar, menu, .context-menu, popover { background-color: @aero_surface; color: @aero_text; }
-menuitem:hover { background-color: #293a58; color: #fff; }
-tooltip {
-  background-color: #202d43; color: @aero_text;
-  border: 1px solid @aero_border; border-radius: 7px;
-}
-
-#XfcePanelWindow {
-  background-color: rgba(11, 18, 32, 0.28);
-  color: @aero_text;
-  border-top: 1px solid rgba(139, 156, 255, 0.22);
-  box-shadow: none;
-}
-#whiskermenu-window {
-  background-color: rgba(16, 25, 42, 0.94);
-  color: @aero_text;
-  border: 1px solid rgba(139, 156, 255, 0.42);
-  border-radius: 18px;
-  padding: 10px;
-  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.28);
-}
-#whiskermenu-window entry {
-  background-color: rgba(7, 13, 24, 0.78);
-  border: 1px solid rgba(139, 156, 255, 0.36);
-  border-radius: 12px;
-  min-height: 38px;
-  padding: 6px 12px;
-}
-#whiskermenu-window .view {
-  background-color: transparent;
-  color: @aero_text;
-  border-radius: 10px;
-}
-#whiskermenu-window .view:hover { background-color: rgba(63, 84, 132, 0.40); }
-#whiskermenu-window .view:selected,
-#whiskermenu-window .view:selected:focus {
-  background-color: rgba(70, 96, 154, 0.78);
-  color: #ffffff;
-}
-
-#docklike-plugin button {
-  min-height: 42px;
-  min-width: 42px;
-  border-radius: 10px;
-  background-image: none;
-  background-color: transparent;
-  border: 1px solid transparent;
-  padding: 4px;
-  box-shadow: none;
-}
-#docklike-plugin .open_group {
-  background-color: rgba(52, 75, 119, 0.50);
-  border-bottom: 2px solid #8b9cff;
-}
-#docklike-plugin .active_group {
-  background-color: rgba(67, 91, 147, 0.72);
-  border: 1px solid rgba(139, 156, 255, 0.48);
-}
-#docklike-plugin .hover_group {
-  background-color: rgba(76, 100, 153, 0.55);
-  border: 1px solid rgba(168, 181, 255, 0.40);
-}
-#docklike-plugin .window_count { color: #ffffff; }
+menuitem:hover { background-color: #293d5d; color: #fff; }
+tooltip { background-color: #202f49; color: @aero_text; border: 1px solid @aero_border; border-radius: 8px; }
+#XfcePanelWindow { background-color: rgba(10, 17, 30, 0.78); color: @aero_text; border-top: 1px solid rgba(139, 166, 255, 0.28); box-shadow: none; }
+#whiskermenu-window { background-color: rgba(15, 26, 44, 0.98); color: @aero_text; border: 1px solid rgba(139, 166, 255, 0.42); border-radius: 16px; padding: 10px; box-shadow: 0 14px 42px rgba(0,0,0,0.28); }
+#whiskermenu-window entry { background-color: #0b1627; border: 1px solid #334968; border-radius: 11px; min-height: 38px; padding: 6px 12px; }
+#whiskermenu-window .view { background-color: transparent; color: @aero_text; border-radius: 9px; }
+#whiskermenu-window .view:hover { background-color: rgba(63,84,132,0.40); }
+#whiskermenu-window .view:selected, #whiskermenu-window .view:selected:focus { background-color: #344e7d; color: #fff; }

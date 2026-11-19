@@ -1,9 +1,10 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=AeroOS Control Center
-Comment=Personalize AeroOS and configure your laptop
+Name=AeroOS Settings
+Comment=Manage appearance, devices, sound, network, power and system settings
 Exec=aeroos-control-center
-Icon=preferences-system
+Icon=aeroos
 Terminal=false
-Categories=Settings;
+Categories=Settings;System;
+StartupNotify=true

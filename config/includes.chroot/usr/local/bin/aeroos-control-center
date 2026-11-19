@@ -1,21 +1,150 @@
-#!/bin/sh
-set -eu
+#!/usr/bin/python3
+"""AeroOS Settings: GTK 3 settings hub for Xfce."""
+import platform
+import shutil
+import subprocess
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gdk, Gtk
 
-if [ -z "${DISPLAY:-}" ] || ! command -v zenity >/dev/null 2>&1; then
-  printf '%s\n' "Open AeroOS Control Center from the desktop session."
-  exit 1
-fi
+PAGES = {
+ "Overview":[
+  ("Display","Resolution and screen layout","video-display",["xfce4-display-settings"]),
+  ("Network","Wi-Fi and Ethernet connections","network-workgroup",["nm-connection-editor"]),
+  ("Sound","Speakers and microphone levels","audio-volume-high",["pavucontrol"]),
+  ("Power","Battery, lid and sleep settings","battery-full",["xfce4-power-manager-settings"]),
+  ("Software","Install and update applications","system-software-install",["synaptic-pkexec"]),
+  ("All settings","Complete Xfce settings manager","preferences-system",["xfce4-settings-manager"])],
+ "Personalization":[
+  ("Appearance","Themes, icons and fonts","preferences-desktop-theme",["xfce4-appearance-settings"]),
+  ("AeroOS themes","Choose a color preset","applications-graphics",["/usr/local/bin/aeroos-theme-picker"]),
+  ("Wallpaper","Wallpaper and desktop icons","preferences-desktop-wallpaper",["xfdesktop-settings"]),
+  ("Taskbar and Start","Panel and menu settings","preferences-desktop-panel",["xfce4-panel","--preferences"]),
+  ("Performance","Transparent or compatibility taskbar","preferences-system-performance",["/usr/local/bin/aeroos-performance"])],
+ "Devices":[
+  ("Display","Connected screens and resolution","video-display",["xfce4-display-settings"]),
+  ("Keyboard","Layout and shortcuts","input-keyboard",["xfce4-keyboard-settings"]),
+  ("Mouse and touchpad","Pointer speed and scrolling","input-mouse",["xfce4-mouse-settings"]),
+  ("Bluetooth","Pair and manage devices","bluetooth",["blueman-manager"])],
+ "Connectivity":[
+  ("Network connections","Configure Wi-Fi and Ethernet","network-wired",["nm-connection-editor"]),
+  ("Bluetooth devices","Pair, connect and remove devices","bluetooth",["blueman-manager"]),
+  ("File manager","Browse local and network files","folder-remote",["thunar"])],
+ "Sound and notifications":[
+  ("Sound mixer","Choose output and microphone","audio-volume-high",["pavucontrol"]),
+  ("Notifications","Notification behavior","preferences-system-notifications",["xfce4-notifyd-config"]),
+  ("Media player","Open the built-in media player","multimedia-player",["parole"])],
+ "System":[
+  ("Power and battery","Battery, lid and suspend","battery-full",["xfce4-power-manager-settings"]),
+  ("Default applications","Choose browser and file manager","preferences-desktop-default-applications",["exo-preferred-applications"]),
+  ("Session and startup","Startup applications","system-run",["xfce4-session-settings"]),
+  ("Window behavior","Window buttons and focus","preferences-system-windows",["xfwm4-settings"]),
+  ("System monitor","Running apps and resource use","utilities-system-monitor",["xfce4-taskmanager"])],
+ "About AeroOS":[
+  ("About this system","Version and hardware information","help-about",["__about__"]),
+  ("Welcome guide","First-start and persistence guide","aeroos",["/usr/local/bin/aeroos-welcome"]),
+  ("Terminal","Open a diagnostic terminal","utilities-terminal",["xfce4-terminal"])]
+}
+CSS=b"""
+window,.background{background:#0b1220;color:#eaf0fb}
+headerbar{background:#111d31;color:#eef3ff;border-bottom:1px solid #263958}
+#sidebar{background:#0e192a;border-right:1px solid #263650}
+#sidebar row{padding:9px 12px;border-radius:8px;margin:3px 8px;color:#b9c8e4}
+#sidebar row:selected{background:#263b62;color:#fff}
+#page-title{color:#f4f7ff;font-size:22px;font-weight:700}
+#page-subtitle{color:#9fb0cc;font-size:10pt}
+#settings-card{background:#142238;border:1px solid #2a3d5d;border-radius:13px;padding:14px}
+#settings-card:hover{background:#1b2d49;border-color:#829eff}
+#card-title{color:#f4f7ff;font-size:11pt;font-weight:700}
+#card-description{color:#a9bad5;font-size:9pt}
+scrolledwindow{border:none}
+"""
+def system_info():
+ cpu="Unknown CPU"; memory="Unknown"; version="0.4.0-rc1"
+ try:
+  with open("/proc/cpuinfo",encoding="utf-8") as f:
+   for line in f:
+    if line.lower().startswith("model name"): cpu=line.split(":",1)[1].strip(); break
+ except OSError: pass
+ try:
+  with open("/proc/meminfo",encoding="utf-8") as f:
+   for line in f:
+    if line.startswith("MemTotal:"): memory=f"{int(line.split()[1])/1024/1024:.1f} GiB RAM"; break
+ except (OSError,ValueError): pass
+ try:
+  with open("/etc/aeroos-release",encoding="utf-8") as f:
+   for line in f:
+    if line.startswith("VERSION="): version=line.split("=",1)[1].strip().strip('"'); break
+ except OSError: pass
+ return [("AeroOS",version),("Processor",cpu),("Memory",memory),("Architecture",platform.machine()),("Kernel",platform.release())]
 
-choice="$(zenity --list --title="AeroOS Control Center" --text="Personalize your desktop and configure your laptop." --column="Settings" --width=520 --height=420 "Theme and accent color" "Wallpaper and desktop icons" "Taskbar and Start menu" "Display and screen resolution" "Keyboard and shortcuts" "Power and battery" "Performance profile" "All system settings")" || exit 0
+class Settings(Gtk.Window):
+ def __init__(self):
+  super().__init__(title="AeroOS Settings")
+  self.set_default_size(940,650); self.set_size_request(720,500)
+  self.set_position(Gtk.WindowPosition.CENTER); self.set_icon_name("aeroos")
+  provider=Gtk.CssProvider(); provider.load_from_data(CSS)
+  Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),provider,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+  header=Gtk.HeaderBar(); header.set_show_close_button(True); header.set_title("AeroOS Settings")
+  header.set_subtitle("One place to configure your desktop"); self.set_titlebar(header)
+  root=Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing=0); self.add(root)
+  sidebar=Gtk.ListBox(); sidebar.set_name("sidebar"); sidebar.set_selection_mode(Gtk.SelectionMode.SINGLE)
+  sidebar.set_size_request(205,-1); root.pack_start(sidebar,False,False,0)
+  self.stack=Gtk.Stack(); self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+  self.stack.set_transition_duration(120)
+  scroll=Gtk.ScrolledWindow(); scroll.set_policy(Gtk.PolicyType.NEVER,Gtk.PolicyType.AUTOMATIC)
+  scroll.add(self.stack); root.pack_start(scroll,True,True,0)
+  for page,entries in PAGES.items():
+   self.stack.add_named(self.make_page(page,entries),page)
+   row=Gtk.ListBoxRow(); row.set_name(page)
+   label=Gtk.Label(label=page,xalign=0); label.set_margin_start(8); label.set_margin_top(5); label.set_margin_bottom(5)
+   row.add(label); sidebar.add(row)
+  sidebar.connect("row-selected",self.select_page); sidebar.show_all()
+  sidebar.select_row(sidebar.get_row_at_index(0))
+ def make_page(self,page,entries):
+  box=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=14)
+  box.set_margin_top(24); box.set_margin_bottom(26); box.set_margin_start(24); box.set_margin_end(24)
+  title=Gtk.Label(label=page,xalign=0); title.set_name("page-title"); box.pack_start(title,False,False,0)
+  sub=Gtk.Label(label="Choose a card to open the installed system tool.",xalign=0)
+  sub.set_name("page-subtitle"); sub.set_line_wrap(True); box.pack_start(sub,False,False,0)
+  if page in ("Overview","About AeroOS"):
+   grid=Gtk.Grid(); grid.set_column_spacing(12); grid.set_row_spacing(8); grid.set_column_homogeneous(True)
+   for i,(k,v) in enumerate(system_info()):
+    label=Gtk.Label(label=f"{k}\n{v}",xalign=0); label.set_name("page-subtitle"); label.set_line_wrap(True)
+    grid.attach(label,i%2,i//2,1,1)
+   box.pack_start(grid,False,False,8)
+  flow=Gtk.FlowBox(); flow.set_selection_mode(Gtk.SelectionMode.NONE)
+  flow.set_max_children_per_line(3); flow.set_min_children_per_line(1); flow.set_homogeneous(True)
+  flow.set_row_spacing(11); flow.set_column_spacing(11)
+  for name,desc,icon,cmd in entries:
+   button=Gtk.Button(); button.set_relief(Gtk.ReliefStyle.NONE); button.set_name("settings-card")
+   button.set_size_request(175,112); button.set_hexpand(True)
+   card=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=7)
+   image=Gtk.Image.new_from_icon_name(icon,Gtk.IconSize.DIALOG); image.set_pixel_size(27)
+   heading=Gtk.Label(label=name,xalign=0); heading.set_name("card-title")
+   detail=Gtk.Label(label=desc,xalign=0); detail.set_name("card-description"); detail.set_line_wrap(True); detail.set_max_width_chars(27)
+   card.pack_start(image,False,False,0); card.pack_start(heading,False,False,0); card.pack_start(detail,True,True,0)
+   button.add(card); button.connect("clicked",self.launch,cmd,name); flow.add(button)
+  box.pack_start(flow,False,False,0)
+  if page=="Overview":
+   note=Gtk.Label(label="Start: Windows/Aero key or Ctrl+Esc. Switch apps: Alt+Tab. Close window: Alt+F4.",xalign=0)
+   note.set_name("page-subtitle"); note.set_line_wrap(True); box.pack_start(note,False,False,8)
+  return box
+ def select_page(self,box,row):
+  if row is not None: self.stack.set_visible_child_name(row.get_name())
+ def launch(self,button,cmd,name):
+  if cmd==["__about__"]:
+   self.message(Gtk.MessageType.INFO,"About AeroOS","\n".join(f"{k}: {v}" for k,v in system_info())+"\n\nAeroOS is a Debian Live release candidate; target hardware still needs hands-on testing.")
+   return
+  if not cmd[0].startswith("/") and shutil.which(cmd[0]) is None:
+   self.message(Gtk.MessageType.WARNING,f"{name} is unavailable",f"Command not found: {cmd[0]}"); return
+  try:
+   subprocess.Popen(cmd,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True,close_fds=True)
+  except (OSError,ValueError) as exc: self.message(Gtk.MessageType.ERROR,f"Could not open {name}",str(exc))
+ def message(self,kind,title,detail):
+  dialog=Gtk.MessageDialog(transient_for=self,flags=Gtk.DialogFlags.MODAL,message_type=kind,buttons=Gtk.ButtonsType.CLOSE,text=title)
+  dialog.format_secondary_text(detail); dialog.run(); dialog.destroy()
 
-case "$choice" in
-  "Theme and accent color") exec /usr/local/bin/aeroos-theme-picker ;;
-  "Wallpaper and desktop icons") exec xfdesktop-settings ;;
-  "Taskbar and Start menu") exec xfce4-panel --preferences=1 ;;
-  "Display and screen resolution") exec xfce4-display-settings ;;
-  "Keyboard and shortcuts") exec xfce4-keyboard-settings ;;
-  "Power and battery") exec xfce4-power-manager-settings ;;
-  "Performance profile") exec /usr/local/bin/aeroos-performance ;;
-  "All system settings") exec xfce4-settings-manager ;;
-  *) exit 0 ;;
-esac
+def main():
+ window=Settings(); window.connect("destroy",Gtk.main_quit); window.show_all(); Gtk.main()
+if __name__=="__main__": main()

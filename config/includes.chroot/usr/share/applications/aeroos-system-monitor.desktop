@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=System Monitor
+Comment=Inspect running applications and resource use
+Exec=xfce4-taskmanager
+Icon=utilities-system-monitor
+Terminal=false
+Categories=System;Monitor;
