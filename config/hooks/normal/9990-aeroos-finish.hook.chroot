@@ -8,7 +8,7 @@ ln -sf /lib/systemd/system/lightdm.service /etc/systemd/system/display-manager.s
 # Keep Debian's /etc/os-release intact and expose AeroOS identity separately.
 cat > /etc/aeroos-release <<'EOF'
 NAME="AeroOS"
-VERSION="0.4.0-rc1"
+VERSION="0.4.1-rc1"
 BASE="Debian GNU/Linux 13 (trixie)"
 ARCHITECTURE="amd64"
 TARGET="HP ProBook 4520s class hardware"

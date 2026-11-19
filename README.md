@@ -1,39 +1,77 @@
 # AeroOS
 
-**AeroOS 0.4.0-rc1** is a real Debian Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
+**AeroOS 0.4.1-rc1** is a Debian 13 Live operating system with a lightweight, Windows-inspired desktop. Its first hardware target is the HP ProBook 4520s: Intel Core i5-480M, 8 GB RAM, Legacy BIOS and a user-reported Radeon HD 64xx-family GPU.
 
-It is a bootable operating-system image, not a website or desktop mock-up. It runs from a USB drive and does not install to or repartition the laptop's internal Windows drive.
+AeroOS runs from a USB drive. The Live image does not install to, repartition or intentionally modify the laptop's internal Windows drive.
 
 ## Build and verification status
 
-- Debian 13 Trixie amd64 Live ISO: built successfully by GitHub Actions.
-- Legacy BIOS hybrid ISO: produced by the build and checked with xorriso.
-- Source/configuration checks and persistence-parser tests: run during every build.
-- Actual HP ProBook hardware test: still required. Wi-Fi, audio, graphics acceleration, suspend/resume, brightness keys and USB boot behavior cannot be certified by CI alone.
+- Debian 13 Trixie amd64 ISO: built successfully by GitHub Actions.
+- Legacy BIOS hybrid boot image: checked with xorriso.
+- Source/configuration checks and persistence-parser tests: run during each build.
+- The native taskbar dependencies, including the separate Xfce power-manager panel plugin, are included and checked by CI.
+- **Actual HP ProBook hardware testing is still required.** CI cannot certify Wi-Fi, sound, Bluetooth, graphics acceleration, battery reporting, suspend/resume, brightness keys or USB compatibility on the physical laptop.
 
-Until the HP is tested, this remains a release candidate rather than a finished, hardware-certified OS.
+This is a release candidate, not a claim of hardware certification or a bug-free final release.
 
-## Desktop and included apps
+## Desktop
 
-The desktop uses Xfce and LightDM with a native Xfce panel, application launchers, running-window buttons, system tray, battery/power, volume and clock. The Start button is at the left, pinned and running app icons are centred in a pinned application dock, and the system tray, volume and clock are at the right. The Start menu provides favorites, recent applications, categories and search.
+The desktop uses Xfce and LightDM with a native Xfce panel:
 
-Xfwm compositing is enabled for actual panel transparency. GTK animations remain disabled to limit overhead on older graphics hardware. The dock uses explicit AeroOS launcher entries so each pinned application has its own correct icon. A solid-taskbar profile is available if the graphics adapter struggles.
+- **Left:** Aero Start button.
+- **Centre:** individual pinned application launchers and running-window buttons.
+- **Right:** system tray, battery/power indicator, volume control, clock and session/power menu.
 
-Included applications and tools:
+The panel uses Xfce's built-in launcher and tasklist plugins instead of a third-party dock. The Start menu provides favorites, installed applications, categories and search. A restrained translucent theme is enabled by default; a solid-panel performance profile is available for older graphics hardware.
+
+## Included applications and tools
 
 - **File Explorer:** Thunar, removable-drive browsing and archive support.
 - **Web browser:** Firefox ESR.
-- **App Store / package manager:** Synaptic.
-- **Settings:** AeroOS Settings hub and Xfce Settings Manager. The hub opens the installed display, keyboard, mouse, power, notification, network, Bluetooth, audio and package-management tools.
+- **App Store:** Synaptic package manager.
+- **Settings:** AeroOS Settings hub plus the native Xfce settings tools.
 - **Terminal:** Xfce Terminal.
 - **Calculator:** Galculator.
 - **Text editor:** Mousepad.
 - **Media player:** Parole.
 - **System monitor:** Xfce Task Manager.
-- **Power menu:** Xfce session logout/shutdown controls.
-- **Networking and devices:** NetworkManager, Wi-Fi firmware families, Bluetooth utilities, audio controls and removable storage support.
+- **Networking:** NetworkManager and supported Wi-Fi firmware packages.
+- **Bluetooth:** Blueman.
+- **Audio:** PulseAudio controls and mixer.
+- **Power:** Xfce power manager and its panel plugin.
 
-The Control Center provides six light/dark theme and accent presets, wallpaper and icon settings, taskbar configuration, display, keyboard, power and performance options. A one-time **Set Up Persistence** utility creates the full-persistence area on the AeroOS USB.
+## Keyboard shortcuts
+
+- **Windows/Aero key** or **Ctrl+Esc:** open Start.
+- **Win+E:** File Explorer.
+- **Win+W:** browser.
+- **Win+T:** Terminal.
+- **Win+I:** AeroOS Settings.
+- **Win+R:** application finder.
+- **Alt+Tab:** switch windows.
+- **Alt+F4:** close the active window.
+- **Win+D:** show the desktop.
+- **Ctrl+Shift+Esc:** Task Manager.
+
+Some laptop function keys depend on the specific keyboard and firmware.
+
+## AeroOS Settings
+
+Open **AeroOS Settings** from the Start menu or desktop shortcut. It provides sections for Overview, Personalization, Devices, Connectivity, Sound and notifications, System, and About AeroOS. The cards open real installed Xfce and device configuration tools; they are not simulated settings.
+
+## USB Live use
+
+AeroOS is designed to be tested as a Live USB before any persistence setup. Do not select an installer or an internal disk. To return to Windows, shut down AeroOS, wait until the laptop is fully off, remove the USB and power on normally.
+
+Read [docs/USB-AND-PERSISTENCE.md](docs/USB-AND-PERSISTENCE.md) before writing the image or setting up persistence. **Writing the ISO erases the selected USB device.** Verify the selected drive by its capacity and label; never select the laptop's internal disk. Windows cannot read the ext4 persistence partition; cancel any Windows prompt to format it.
+
+The full-persistence utility is optional and is only intended for the AeroOS USB. It requires a one-time `toram` boot and performs strict checks before creating a persistence partition.
+
+## Build the ISO
+
+GitHub Actions runs **Build AeroOS ISO** on pushes to `main` and on manual dispatch. The successful run publishes an ISO, SHA-256 file and BIOS boot report as release assets.
+
+The build scripts validate the source configuration, parse XML, check application launchers and keyboard shortcuts, check persistence-safety requirements, and verify the generated hybrid ISO's BIOS boot record. Those checks do not replace testing on the target laptop.
 
 ## Hardware profile
 
@@ -42,78 +80,9 @@ The Control Center provides six light/dark theme and accent presets, wallpaper a
 - Firmware: Legacy BIOS / Syslinux hybrid media.
 - Memory: zram uses a conservative 25% RAM cap with zstd compression.
 - Graphics: Intel and legacy Radeon X.Org drivers plus Debian firmware packages.
-- Performance defaults: lightweight compositing enabled for transparency, GTK animations disabled, dock previews disabled.
 
 The exact Radeon PCI ID and Wi-Fi adapter are not yet confirmed. See [docs/HARDWARE-TARGET.md](docs/HARDWARE-TARGET.md).
-
-## Customize AeroOS
-
-Open **AeroOS Settings** from the desktop Settings shortcut or Start menu. The taskbar has a Start button at the left, app icons in the centre, and indicators at the right. Click Start or press the Windows/Super key for favorites, recent apps, categories and search. Right-click an app in Start and choose **Add to Favorites** to pin it.
-
-The existing desktop wallpaper is unchanged by this taskbar update. See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for appearance, taskbar and menu settings.
-
-## Build the ISO
-
-GitHub Actions runs **Build AeroOS ISO** on pushes to `main` and on manual dispatch.
-
-1. Open the repository's **Actions** tab.
-2. Open the newest successful **Build AeroOS ISO** run.
-3. Download and extract the `AeroOS-ISO` artifact.
-4. Verify the ISO using `live-image-amd64.hybrid.iso.sha256`.
-5. The ISO is `live-image-amd64.hybrid.iso`.
-
-The artifact also includes the build log and El Torito boot report. Each workflow artifact is retained for 30 days.
-
-Build locally on Debian Trixie amd64 with root access:
-
-```bash
-sudo apt update
-sudo apt install live-build debootstrap xorriso isolinux syslinux-common squashfs-tools dosfstools mtools ca-certificates gpgv libxml2-utils python3
-./auto/config
-sudo lb build
-```
-
-## USB boot and maximum practical persistence
-
-Read [docs/USB-AND-PERSISTENCE.md](docs/USB-AND-PERSISTENCE.md) before writing the image.
-
-AeroOS boots with Debian Live's `persistence` option. Full-root persistence uses an ext4 partition labelled `persistence` with a root-level `persistence.conf` containing:
-
-```text
-/ union
-```
-
-The setup utility can create that partition in the unused space at the end of the same USB. For safety, it requires a one-time `toram` boot so the USB is not in use while its partition table is changed. It will only proceed when it identifies the AeroOS-labeled removable drive, the capacity is between 8 and 32 GiB, and every partition on that drive is unmounted. It refuses ambiguous or unsupported layouts.
-
-Full persistence saves the writable system overlay: personal files, settings, installed packages and system changes. The USB's capacity is finite; the persistence partition uses the available space left after the ISO.
-
-**Writing the ISO erases the USB.** Back up its contents first. Never select the laptop's internal drive in a disk tool. Windows normally cannot read the resulting ext4 persistence partition; do not format it when Windows prompts.
-
-## Default Live account
-
-The temporary account is `aero`. Debian Live's default password is `live`; the desktop auto-logs in for this USB session. Open Terminal and run `passwd` to set a private password. With full persistence enabled, the password change is retained across restarts.
-
-## Layout
-
-- `auto/config` — reproducible Debian Live configuration
-- `config/package-lists/` — desktop, firmware and utility packages
-- `config/includes.chroot/` — AeroOS theme, launchers and system defaults
-- `config/hooks/` — image finalization
-- `scripts/` — source/configuration validation and tests
-- `.github/workflows/` — automated ISO builder
-- `docs/` — hardware, customization and USB/persistence instructions
 
 ## License
 
 The repository's MIT license applies to original AeroOS project files. Debian packages and their artwork remain under their respective upstream licenses.
-
-
-## 0.4.0 release-candidate desktop changes
-
-- Replaced the Docklike dependency with native Xfce launcher, tasklist, tray, power-manager, PulseAudio and clock plugins.
-- Added explicit app launcher entries so pinned browser, file manager, terminal, calculator, editor, media player, app store and settings icons resolve to real applications.
-- Added a GTK 3 AeroOS Settings hub that opens the installed Xfce and device configuration tools.
-- Added Super-key, Ctrl+Esc, Super+E, Super+W, Super+T and Super+I shortcuts, plus window-management shortcuts.
-- Refreshed the desktop wallpaper and GTK theme.
-
-This release candidate still requires hands-on testing on the HP ProBook 4520s. A successful CI build verifies ISO generation, configuration structure and source checks; it does not certify Wi-Fi, graphics acceleration, audio, Bluetooth, suspend/resume or special keys on the target laptop.

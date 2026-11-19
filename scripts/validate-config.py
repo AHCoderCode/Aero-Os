@@ -55,7 +55,7 @@ except SyntaxError as e: ERRORS.append(f"Settings Python syntax error: {e}")
 for app in ("xfce4-display-settings","nm-connection-editor","pavucontrol","xfce4-power-manager-settings","blueman-manager","synaptic-pkexec","xfce4-keyboard-settings","xfce4-mouse-settings","xfce4-session-settings"):
     require(app in cc,f"Settings hub missing integration for {app}.")
 welcome=read("config/includes.chroot/usr/local/bin/aeroos-welcome")
-require("0.4.0-rc1" in welcome and "Ctrl+Esc" in welcome and "welcome-shown" in welcome,"Welcome screen needs release, shortcut and first-run marker.")
+require("0.4.1-rc1" in welcome and "Ctrl+Esc" in welcome and "welcome-shown" in welcome,"Welcome screen needs release, shortcut and first-run marker.")
 init=read("config/includes.chroot/usr/local/bin/aeroos-desktop-init")
 require("xfconf-query" in init and "xfdesktop --reload" in init,"Desktop init must apply wallpaper.")
 init_desktop=read("config/includes.chroot/etc/xdg/autostart/aeroos-desktop-init.desktop")

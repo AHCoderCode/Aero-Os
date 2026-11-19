@@ -1,63 +1,69 @@
 # AeroOS customization
 
-AeroOS includes a Control Center so common desktop changes do not require terminal commands.
+AeroOS Settings brings the main desktop and device controls together without requiring terminal commands.
 
-## Open the Control Center
+## Open AeroOS Settings
 
-- Double-click **Settings** on the desktop, or
-- Open the **Start** button on the taskbar and choose **AeroOS Control Center**.
+- Open **Aero** at the left of the taskbar, then choose **AeroOS Settings**, or
+- Double-click **AeroOS Settings** on the desktop, or
+- Press **Windows/Aero + I**.
 
-## Aero taskbar
+## Taskbar
 
-The default taskbar is arranged as follows:
+The default native Xfce panel is arranged as follows:
 
-- **Left:** the AeroOS four-pane Start button.
-- **Centre:** pinned and running app icons in the Docklike group.
-- **Right:** system tray, volume and clock.
+- **Left:** Aero Start button.
+- **Centre:** pinned application launchers and running-window buttons.
+- **Right:** system tray, battery/power, volume, clock and session/power menu.
 
-The taskbar spans the bottom edge, but its background is highly translucent so the app icons remain visually prominent. The two expanding separators around Docklike keep the app group centred between Start and the system tray. The existing wallpaper is deliberately unchanged.
+The application buttons are individual Xfce launchers, not a third-party dock. Running windows appear in the tasklist; click a running-window button to bring its window forward. Use **Alt+Tab** to switch between open windows and **Alt+F4** to close the active window.
 
-The taskbar uses Xfwm compositing to render real transparency. The **Transparent taskbar (recommended)** performance profile keeps compositing enabled but leaves GTK animations off. The **Solid taskbar (maximum battery/compatibility)** profile disables compositing if the older graphics hardware struggles; this makes the taskbar background solid.
+The default panel has a restrained translucent background. The **Performance** option in AeroOS Settings can switch to a solid panel if compositing is slow or visually unstable on older graphics hardware.
 
-## Start menu
+## Start menu and keyboard shortcuts
 
-Click the Start icon at the left of the taskbar or press the **Windows/Super** key.
+Click **Aero** at the left of the taskbar, press either Windows/Super key, or use **Ctrl+Esc** as a fallback.
 
-The menu opens with your pinned/favorite applications. It also includes search, application categories and a recently-used list. To pin an application, browse to it, right-click it and choose **Add to Favorites**. Drag favorites to reorder them.
+The menu includes installed applications, favorites, search and application categories. To pin an app, find it in Start, right-click it and choose **Add to Favorites**.
 
-The default favorites include Firefox, File Explorer, Terminal, Calculator, Text Editor, Media Player, Synaptic and AeroOS Control Center. These applications are also pinned to the centred taskbar dock.
+Default shortcuts:
 
-## Appearance and accent colors
+- **Windows/Aero** or **Ctrl+Esc:** Start.
+- **Win+E:** File Explorer.
+- **Win+W:** Firefox ESR.
+- **Win+T:** Terminal.
+- **Win+I:** AeroOS Settings.
+- **Win+R:** application finder.
+- **Alt+Tab:** switch windows.
+- **Alt+F4:** close the active window.
+- **Win+D:** show the desktop.
+- **Ctrl+Shift+Esc:** Task Manager.
 
-Open **Theme and accent color** and select one of six presets:
+## Personalization
 
-- Aero Dark - Blue
-- Aero Dark - Violet
-- Aero Dark - Teal
-- Aero Light - Blue
-- Aero Light - Violet
-- Aero Light - Teal
+In AeroOS Settings, open **Personalization**:
 
-The selection changes the GTK theme, Papirus icon theme and AeroOS accent palette while keeping the taskbar translucent. It is saved in your home directory and remains with full USB persistence. Already-open applications may need to be closed and reopened to use the new GTK colors.
+- **Appearance:** native GTK theme, icons and fonts.
+- **AeroOS themes:** choose one of six Dark/Light Blue, Violet or Teal presets.
+- **Wallpaper:** change the desktop background and desktop icons.
+- **Taskbar and Start:** open Xfce panel preferences.
+- **Performance:** choose the translucent or solid-panel profile.
 
-## Wallpaper and desktop icons
+The default AeroOS wallpaper is applied when the desktop session starts. User changes are stored in the home directory and survive restarts only when USB persistence is configured.
 
-The default wallpaper is unchanged in this taskbar update. The existing **Wallpaper and desktop icons** option remains available for users who choose to change their own wallpaper, icon visibility or icon size.
+## Devices and connectivity
 
-## Taskbar and Start menu settings
+In AeroOS Settings:
 
-Open **Taskbar and Start menu** to change panel position, size, appearance, items and launchers. Xfce saves those changes in your user profile. Start-menu favorites can be managed from the Start menu itself.
+- **Devices:** display, keyboard, mouse/touchpad and Bluetooth tools.
+- **Connectivity:** NetworkManager connections and Blueman.
+- **Sound and notifications:** PulseAudio mixer, output and microphone controls, and notification settings.
+- **System:** power/battery, default applications, session startup, window behavior and system monitor.
 
-## Display, keyboard and power
+These cards open installed system tools. Device availability still depends on the exact hardware and firmware in the laptop. In particular, Wi-Fi, Bluetooth, audio, battery and graphics behavior must be tested on the target HP ProBook.
 
-The Control Center opens the native Xfce dialogs for screen resolution, keyboard shortcuts and power/battery behavior. Choose only display modes supported by your laptop screen.
+## Full Xfce customization
 
-## Performance
+Open **All settings** on the Overview page to use the complete Xfce Settings Manager. Its native tools cover appearance, display, keyboard, mouse, window manager, sessions and other desktop preferences.
 
-The transparent taskbar requires compositing. The recommended profile enables lightweight compositing without GTK animations. If the old Intel/Radeon graphics become slow or show visual glitches, choose **Solid taskbar (maximum battery/compatibility)** to disable compositing; the panel will become solid.
-
-## Full customization
-
-**All system settings** opens Xfce Settings Manager. It includes appearance, icons, fonts, mouse, keyboard, display, window manager and other desktop preferences. These are native Xfce settings, not simulated controls.
-
-With full-root USB persistence enabled, your theme, taskbar, Start-menu favorites, wallpaper, keyboard and other user preferences are saved across reboots.
+With full-root USB persistence enabled, themes, wallpaper, taskbar layout, favorites and personal files can be retained across normal reboots.
